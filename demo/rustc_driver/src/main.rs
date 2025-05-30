@@ -24,9 +24,12 @@ use stable_mir::{
     ty::Ty,
 };
 
+mod analyze_hir;
+
 fn main() {
     let rustc_args: Vec<_> = std::env::args().collect();
     _ = run_with_tcx!(&rustc_args, |tcx| {
+        analyze_hir::analyze_hir(tcx);
         analyze(tcx);
         ControlFlow::<(), ()>::Continue(())
     });
