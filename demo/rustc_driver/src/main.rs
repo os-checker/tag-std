@@ -6,6 +6,7 @@ extern crate rustc_hir;
 extern crate rustc_hir_pretty;
 extern crate rustc_interface;
 extern crate rustc_middle;
+extern crate rustc_span;
 #[macro_use]
 extern crate rustc_smir;
 extern crate stable_mir;
