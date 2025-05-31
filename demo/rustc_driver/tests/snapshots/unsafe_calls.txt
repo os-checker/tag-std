@@ -1,0 +1,36 @@
+stdout=
+********* "unsafe_calls" [Rlib] has reached 6 instances *********
+
+stderr=
+[src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
+    BlockAndUnsafeCalls {
+        id: HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).3),
+        calls: [
+            HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).5),
+        ],
+    },
+]
+[src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
+    BlockAndUnsafeCalls {
+        id: HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).3),
+        calls: [
+            HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).5),
+        ],
+    },
+]
+[src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
+    BlockAndUnsafeCalls {
+        id: HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).8),
+        calls: [
+            HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).10),
+        ],
+    },
+]
+[src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
+    BlockAndUnsafeCalls {
+        id: HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).9),
+        calls: [
+            HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).11),
+        ],
+    },
+]

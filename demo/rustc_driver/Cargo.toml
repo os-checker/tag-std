@@ -9,6 +9,10 @@ path = "src/bin/cargo-safe-tool.rs"
 
 [dependencies]
 
+[dev-dependencies]
+assert_cmd = "2.0.17"
+expect-test = "1.5.1"
+
 [workspace]
 members = ["safety-tool-lib","safety-tool-macro", "safety-tool-parser"]
 exclude = ["tests/basic"]

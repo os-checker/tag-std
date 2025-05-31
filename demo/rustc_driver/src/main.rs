@@ -24,15 +24,23 @@ use stable_mir::{
     rustc_internal::internal,
     ty::Ty,
 };
+use std::ops::ControlFlow;
 
 mod analyze_hir;
 
 fn main() {
     let rustc_args: Vec<_> = std::env::args().collect();
+    // When STOP_COMPILATION is set to non-0, stop compiling.
+    let ret = if std::env::var("STOP_COMPILATION").map(|s| s != "0").unwrap_or(false) {
+        ControlFlow::<(), ()>::Break(())
+    } else {
+        ControlFlow::<(), ()>::Continue(())
+    };
     _ = run_with_tcx!(&rustc_args, |tcx| {
         analyze_hir::analyze_hir(tcx);
         analyze(tcx);
-        ControlFlow::<(), ()>::Continue(())
+
+        ret
     });
 }
 
