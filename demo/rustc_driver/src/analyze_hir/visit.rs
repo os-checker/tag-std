@@ -3,8 +3,8 @@ use rustc_middle::ty::TyCtxt;
 
 #[derive(Debug)]
 pub struct BlockAndUnsafeCalls {
-    id: HirId,
-    calls: Vec<HirId>,
+    pub id: HirId,
+    pub calls: Vec<HirId>,
 }
 
 struct UnsafeBlocks<'tcx> {

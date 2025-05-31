@@ -10,6 +10,34 @@ stderr=
         ],
     },
 ]
+[src/analyze_hir/mod.rs:60:21] tcx.hir_expect_expr(*call) = Expr {
+    hir_id: HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).5),
+    kind: Path(
+        Resolved(
+            None,
+            Path {
+                span: ./tests/snippets/unsafe_calls.rs:4:14: 4:18 (#0),
+                res: Def(
+                    Fn,
+                    DefId(0:5 ~ unsafe_calls[3f9f]::call),
+                ),
+                segments: [
+                    PathSegment {
+                        ident: call#0,
+                        hir_id: HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).6),
+                        res: Def(
+                            Fn,
+                            DefId(0:5 ~ unsafe_calls[3f9f]::call),
+                        ),
+                        args: None,
+                        infer_args: true,
+                    },
+                ],
+            },
+        ),
+    ),
+    span: ./tests/snippets/unsafe_calls.rs:4:14: 4:18 (#0),
+}
 [src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
     BlockAndUnsafeCalls {
         id: HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).3),
@@ -18,6 +46,34 @@ stderr=
         ],
     },
 ]
+[src/analyze_hir/mod.rs:60:21] tcx.hir_expect_expr(*call) = Expr {
+    hir_id: HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).5),
+    kind: Path(
+        Resolved(
+            None,
+            Path {
+                span: ./tests/snippets/unsafe_calls.rs:9:9: 9:13 (#0),
+                res: Def(
+                    Fn,
+                    DefId(0:5 ~ unsafe_calls[3f9f]::call),
+                ),
+                segments: [
+                    PathSegment {
+                        ident: call#0,
+                        hir_id: HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).6),
+                        res: Def(
+                            Fn,
+                            DefId(0:5 ~ unsafe_calls[3f9f]::call),
+                        ),
+                        args: None,
+                        infer_args: true,
+                    },
+                ],
+            },
+        ),
+    ),
+    span: ./tests/snippets/unsafe_calls.rs:9:9: 9:13 (#0),
+}
 [src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
     BlockAndUnsafeCalls {
         id: HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).8),
@@ -26,6 +82,32 @@ stderr=
         ],
     },
 ]
+[src/analyze_hir/mod.rs:60:21] tcx.hir_expect_expr(*call) = Expr {
+    hir_id: HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).10),
+    kind: Path(
+        Resolved(
+            None,
+            Path {
+                span: ./tests/snippets/unsafe_calls.rs:21:14: 21:15 (#0),
+                res: Local(
+                    HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).6),
+                ),
+                segments: [
+                    PathSegment {
+                        ident: f#0,
+                        hir_id: HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).11),
+                        res: Local(
+                            HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).6),
+                        ),
+                        args: None,
+                        infer_args: true,
+                    },
+                ],
+            },
+        ),
+    ),
+    span: ./tests/snippets/unsafe_calls.rs:21:14: 21:15 (#0),
+}
 [src/analyze_hir/mod.rs:57:13] &unsafe_blocks = [
     BlockAndUnsafeCalls {
         id: HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).9),
@@ -34,3 +116,29 @@ stderr=
         ],
     },
 ]
+[src/analyze_hir/mod.rs:60:21] tcx.hir_expect_expr(*call) = Expr {
+    hir_id: HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).11),
+    kind: Path(
+        Resolved(
+            None,
+            Path {
+                span: ./tests/snippets/unsafe_calls.rs:26:14: 26:15 (#0),
+                res: Local(
+                    HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).7),
+                ),
+                segments: [
+                    PathSegment {
+                        ident: f#0,
+                        hir_id: HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).12),
+                        res: Local(
+                            HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).7),
+                        ),
+                        args: None,
+                        infer_args: true,
+                    },
+                ],
+            },
+        ),
+    ),
+    span: ./tests/snippets/unsafe_calls.rs:26:14: 26:15 (#0),
+}

@@ -55,6 +55,11 @@ pub fn analyze_hir(tcx: TyCtxt) {
         let unsafe_blocks = visit::get_unsafe_blocks(tcx, body);
         if !unsafe_blocks.is_empty() {
             dbg!(&unsafe_blocks);
+            for b in &unsafe_blocks {
+                for call in &b.calls {
+                    dbg!(tcx.hir_expect_expr(*call));
+                }
+            }
         }
     }
 }
