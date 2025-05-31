@@ -5,6 +5,7 @@ use rustc_span::{Ident, Span};
 
 mod db;
 mod reachability;
+mod visit;
 
 pub fn analyze_hir(tcx: TyCtxt) {
     let def_items = tcx.hir_crate_items(()).definitions();
@@ -51,7 +52,10 @@ pub fn analyze_hir(tcx: TyCtxt) {
 
         // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
-        dbg!(matches!(body.kind, ExprKind::Block(..)));
+        let unsafe_blocks = visit::get_unsafe_blocks(tcx, body);
+        if !unsafe_blocks.is_empty() {
+            dbg!(&unsafe_blocks);
+        }
     }
 }
 
