@@ -1,9 +1,11 @@
+use super::is_tool_attr;
 use rustc_hir::{
     def::{DefKind, Res},
     def_id::DefId,
     intravisit::*,
     *,
 };
+use rustc_hir_pretty::attribute_to_string;
 use rustc_middle::ty::TyCtxt;
 
 #[derive(Debug)]
@@ -12,6 +14,29 @@ pub struct Call {
     pub hir_id: HirId,
     /// function def id
     pub def_id: DefId,
+}
+
+impl Call {
+    pub fn get_all_attrs(&self, body_hir_id: HirId, tcx: TyCtxt) {
+        let print = |hir_id: HirId| {
+            eprintln!("hir_id={hir_id:?} body_hir_id={body_hir_id:?}");
+            let mut empty = true;
+            for attr in tcx.get_all_attrs(hir_id.owner.def_id).filter(is_tool_attr) {
+                eprintln!("{hir_id:?} {}", attribute_to_string(&tcx, attr));
+                empty = false;
+            }
+            empty
+        };
+        print(self.hir_id);
+
+        for parent in tcx.hir_parent_id_iter(self.hir_id) {
+            let empty = print(parent);
+            // stop at first tool attrs
+            if !empty || parent == body_hir_id {
+                break;
+            }
+        }
+    }
 }
 
 pub struct Calls<'tcx> {

@@ -28,14 +28,7 @@ pub fn analyze_hir(tcx: TyCtxt) {
 
         let attrs = tcx.hir_attrs(hir_fn.hir_id);
 
-        let tool_attrs = attrs.iter().filter(|attr| {
-            if let Attribute::Unparsed(tool_attr) = attr {
-                if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
-                    return true;
-                }
-            }
-            false
-        });
+        let tool_attrs = attrs.iter().filter(is_tool_attr);
 
         let def_id = local_def_id.to_def_id();
         let def_path = tcx.def_path_debug_str(def_id);
@@ -56,8 +49,21 @@ pub fn analyze_hir(tcx: TyCtxt) {
         let unsafe_calls = calls.get_unsafe_calls();
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);
+            let body_hir_id = body.hir_id;
+            for call in &unsafe_calls {
+                call.get_all_attrs(body_hir_id, tcx);
+            }
         }
     }
+}
+
+fn is_tool_attr(attr: &&Attribute) -> bool {
+    if let Attribute::Unparsed(tool_attr) = attr {
+        if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
+            return true;
+        }
+    }
+    false
 }
 
 struct HirFn<'hir> {

@@ -2,33 +2,62 @@ stdout=
 ********* "unsafe_calls" [Rlib] has reached 6 instances *********
 
 stderr=
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:51:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).5),
         def_id: DefId(0:5 ~ unsafe_calls[3f9f]::call),
     },
 ]
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).5) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).4) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).3) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).2) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).7) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).1) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8) body_hir_id=HirId(DefId(0:3 ~ unsafe_calls[3f9f]::foo).8)
+[src/analyze_hir/mod.rs:51:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).5),
         def_id: DefId(0:5 ~ unsafe_calls[3f9f]::call),
     },
 ]
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).5) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).4) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).7) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).3) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).2) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).1) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8) body_hir_id=HirId(DefId(0:4 ~ unsafe_calls[3f9f]::bar).8)
+[src/analyze_hir/mod.rs:51:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).3),
         def_id: DefId(0:5 ~ unsafe_calls[3f9f]::call),
     },
 ]
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).3) body_hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6)
+hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).2) body_hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6)
+hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).5) body_hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6)
+hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).1) body_hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6)
+hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6) body_hir_id=HirId(DefId(0:6 ~ unsafe_calls[3f9f]::baz).6)
+[src/analyze_hir/mod.rs:51:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).3),
         def_id: DefId(0:5 ~ unsafe_calls[3f9f]::call),
     },
 ]
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).3) body_hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13)
+hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).5) body_hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13)
+hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).2) body_hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13)
+hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).1) body_hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13)
+hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13) body_hir_id=HirId(DefId(0:7 ~ unsafe_calls[3f9f]::assign).13)
+[src/analyze_hir/mod.rs:51:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).4),
         def_id: DefId(0:5 ~ unsafe_calls[3f9f]::call),
     },
 ]
+hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).4) body_hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14)
+hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).6) body_hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14)
+hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).2) body_hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14)
+hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).1) body_hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14)
+hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14) body_hir_id=HirId(DefId(0:8 ~ unsafe_calls[3f9f]::assign_fn_ptr).14)
