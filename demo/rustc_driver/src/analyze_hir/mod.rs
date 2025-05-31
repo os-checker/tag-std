@@ -52,14 +52,10 @@ pub fn analyze_hir(tcx: TyCtxt) {
 
         // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
-        let unsafe_blocks = visit::get_unsafe_blocks(tcx, body);
-        if !unsafe_blocks.is_empty() {
-            dbg!(&unsafe_blocks);
-            for b in &unsafe_blocks {
-                for call in &b.calls {
-                    dbg!(tcx.hir_expect_expr(*call));
-                }
-            }
+        let calls = visit::get_calls(tcx, body);
+        let unsafe_calls = calls.get_unsafe_calls();
+        if !unsafe_calls.is_empty() {
+            dbg!(&unsafe_calls);
         }
     }
 }

@@ -1,53 +1,25 @@
-use rustc_hir::{intravisit::*, *};
+use rustc_hir::{
+    def::{DefKind, Res},
+    def_id::DefId,
+    intravisit::*,
+    *,
+};
 use rustc_middle::ty::TyCtxt;
 
 #[derive(Debug)]
-pub struct BlockAndUnsafeCalls {
-    pub id: HirId,
-    pub calls: Vec<HirId>,
+pub struct Call {
+    /// function use id
+    pub hir_id: HirId,
+    /// function def id
+    pub def_id: DefId,
 }
 
-struct UnsafeBlocks<'tcx> {
+pub struct Calls<'tcx> {
     tcx: TyCtxt<'tcx>,
-    blocks: Vec<BlockAndUnsafeCalls>,
+    calls: Vec<Call>,
 }
 
-impl<'tcx> Visitor<'tcx> for UnsafeBlocks<'tcx> {
-    type MaybeTyCtxt = TyCtxt<'tcx>;
-    type NestedFilter = rustc_middle::hir::nested_filter::OnlyBodies;
-    type Result = ();
-
-    fn maybe_tcx(&mut self) -> Self::MaybeTyCtxt {
-        self.tcx
-    }
-
-    fn visit_block(&mut self, b: &'tcx Block<'tcx>) -> Self::Result {
-        if matches!(b.rules, BlockCheckMode::UnsafeBlock(_)) {
-            let mut unsafe_calls = UnsafeCalls { tcx: self.tcx, calls: Vec::new() };
-            walk_block(&mut unsafe_calls, b);
-
-            let b_calls = BlockAndUnsafeCalls { id: b.hir_id, calls: unsafe_calls.calls };
-            self.blocks.push(b_calls);
-        }
-        walk_block(self, b)
-    }
-}
-
-pub fn get_unsafe_blocks<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    expr: &'tcx Expr<'tcx>,
-) -> Vec<BlockAndUnsafeCalls> {
-    let mut visitor = UnsafeBlocks { tcx, blocks: Vec::new() };
-    walk_expr(&mut visitor, expr);
-    visitor.blocks
-}
-
-struct UnsafeCalls<'tcx> {
-    tcx: TyCtxt<'tcx>,
-    calls: Vec<HirId>,
-}
-
-impl<'tcx> Visitor<'tcx> for UnsafeCalls<'tcx> {
+impl<'tcx> Visitor<'tcx> for Calls<'tcx> {
     type MaybeTyCtxt = TyCtxt<'tcx>;
     type NestedFilter = rustc_middle::hir::nested_filter::OnlyBodies;
     type Result = ();
@@ -57,9 +29,26 @@ impl<'tcx> Visitor<'tcx> for UnsafeCalls<'tcx> {
     }
 
     fn visit_expr(&mut self, ex: &'tcx Expr<'tcx>) -> Self::Result {
-        if let ExprKind::Call(f, _) = ex.kind {
-            self.calls.push(f.hir_id);
+        if let ExprKind::Path(QPath::Resolved(_opt_ty, path)) = ex.kind {
+            if let Res::Def(DefKind::Fn, def_id) = path.res {
+                self.calls.push(Call { hir_id: ex.hir_id, def_id });
+            }
         }
         walk_expr(self, ex)
+    }
+}
+
+pub fn get_calls<'tcx>(tcx: TyCtxt<'tcx>, expr: &'tcx Expr<'tcx>) -> Calls<'tcx> {
+    let mut calls = Calls { tcx, calls: Vec::new() };
+    walk_expr(&mut calls, expr);
+    calls
+}
+
+impl Calls<'_> {
+    pub fn get_unsafe_calls(&self) -> Vec<&Call> {
+        self.calls
+            .iter()
+            .filter(|call| self.tcx.fn_sig(call.def_id).skip_binder().safety().is_unsafe())
+            .collect()
     }
 }
