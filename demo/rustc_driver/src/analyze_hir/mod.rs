@@ -43,6 +43,8 @@ pub fn analyze_hir(tcx: TyCtxt) {
             );
         }
 
+        eprintln!("{}", rustc_hir_pretty::id_to_string(&tcx, hir_fn.hir_id));
+
         // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
         let calls = visit::get_calls(tcx, body);
