@@ -1,10 +1,17 @@
+#![feature(stmt_expr_attributes)]
+#![feature(register_tool)]
+#![register_tool(Safety)]
 #![allow(dead_code)]
 
-pub fn foo() {
-    unsafe { call() };
+pub fn tag_expr() {
+    unsafe {
+        #[Safety::tag_expr]
+        call()
+    };
 }
 
-pub fn bar() {
+pub fn tag_block() {
+    #[Safety::tag_block]
     unsafe {
         call();
     }
@@ -12,16 +19,23 @@ pub fn bar() {
 
 unsafe fn call() {}
 
-unsafe fn baz() {
+#[Safety::tag_unsafe_fn]
+unsafe fn tag_unsafe_fn() {
     call();
 }
 
 pub fn assign() {
     let f = call;
-    unsafe { f() };
+    #[Safety::assign]
+    unsafe {
+        f()
+    };
 }
 
 pub fn assign_fn_ptr() {
     let f: unsafe fn() = call;
-    unsafe { f() };
+    unsafe {
+        #[Safety::assign_fn_ptr]
+        f()
+    };
 }

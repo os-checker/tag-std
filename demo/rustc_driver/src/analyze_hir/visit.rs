@@ -21,7 +21,7 @@ impl Call {
         let print = |hir_id: HirId| {
             eprintln!("hir_id={hir_id:?} body_hir_id={body_hir_id:?}");
             let mut empty = true;
-            for attr in tcx.get_all_attrs(hir_id.owner.def_id).filter(is_tool_attr) {
+            for attr in tcx.hir_attrs(hir_id).iter().filter(is_tool_attr) {
                 eprintln!("{hir_id:?} {}", attribute_to_string(&tcx, attr));
                 empty = false;
             }
