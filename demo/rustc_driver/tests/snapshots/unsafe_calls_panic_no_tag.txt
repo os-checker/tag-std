@@ -1,0 +1,44 @@
+stdout=
++++++ call (def_path="unsafe_calls_panic_no_tag[a8c2]::call" hash=a8c22318b790516a-e539ea6c6f93a299) (./tests/snippets/unsafe_calls_panic_no_tag.rs:6:1: 6:22 (#0)) +++++
+ => "#[Safety::inner(Tag)]\n"
+
+
+stderr=
+unsafe fn call() { }
+unsafe fn submod_no_tag() { super::call(); }
+[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+    Call {
+        hir_id: HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).3),
+        def_id: DefId(0:5 ~ unsafe_calls_panic_no_tag[a8c2]::call),
+    },
+]
+[src/analyze_hir/mod.rs:119:28] meta = MetaItem {
+    unsafety: Default,
+    path: Path {
+        span: ./tests/snippets/unsafe_calls_panic_no_tag.rs:6:17: 6:20 (#0),
+        segments: [
+            PathSegment {
+                ident: Tag#0,
+                id: NodeId(4294967040),
+                args: None,
+            },
+        ],
+        tokens: None,
+    },
+    kind: Word,
+    span: ./tests/snippets/unsafe_calls_panic_no_tag.rs:6:17: 6:20 (#0),
+}
+[src/analyze_hir/mod.rs:120:13] property = Tag#0
+[src/analyze_hir/visit.rs:23:9] &tags = {
+    Tag#0: false,
+}
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).3) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).2) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).6) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).1) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).7) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0) fn_hir_id=HirId(DefId(0:4 ~ unsafe_calls_panic_no_tag[a8c2]::submod::submod_no_tag).0)
+
+thread 'rustc' panicked at src/analyze_hir/visit.rs:65:13:
+Tag#0 is not discharged
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

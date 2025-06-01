@@ -14,10 +14,8 @@ static LD_LIBRARY_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     path
 });
 
-#[test]
-fn unsafe_calls() {
+fn compile(file: &str) -> (&'static str, std::process::Output) {
     let exe = env!("CARGO_PKG_NAME");
-    let file = "./tests/snippets/unsafe_calls.rs";
     let output = Command::cargo_bin(exe)
         .unwrap()
         .arg(file)
@@ -27,11 +25,53 @@ fn unsafe_calls() {
         .env("LD_LIBRARY_PATH", &*LD_LIBRARY_PATH)
         .output()
         .unwrap();
+    (exe, output)
+}
+
+fn should_panic(file: &str, outfile: &str) {
+    let (exe, output) = compile(file);
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    let stderr = std::str::from_utf8(&output.stderr).unwrap();
+    if output.status.success() {
+        panic!("`{exe} {file}` should panic:\nstdout={stdout}\nstderr={stderr}")
+    }
+    let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
+    expect_file![outfile].assert_eq(&out);
+}
+
+fn testcase(name: &str) -> [String; 2] {
+    let file = format!("./tests/snippets/{name}.rs");
+    let outfile = format!("snapshots/{name}.txt");
+    [file, outfile]
+}
+
+#[test]
+fn unsafe_calls() {
+    let [file, outfile] = &testcase("unsafe_calls");
+    let (exe, output) = compile(file);
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     let stderr = std::str::from_utf8(&output.stderr).unwrap();
     if !output.status.success() {
         panic!("Failed to run `{exe} {file}`:\nstdout={stdout}\nstderr={stderr}")
     }
     let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
-    expect_file!["snapshots/unsafe_calls.txt"].assert_eq(&out);
+    expect_file![outfile].assert_eq(&out);
+}
+
+#[test]
+fn unsafe_calls_panic_assign() {
+    let [file, outfile] = &testcase("unsafe_calls_panic_assign");
+    should_panic(file, outfile);
+}
+
+#[test]
+fn unsafe_calls_panic_assign_fn_ptr() {
+    let [file, outfile] = &testcase("unsafe_calls_panic_assign_fn_ptr");
+    should_panic(file, outfile);
+}
+
+#[test]
+fn unsafe_calls_panic_no_tag() {
+    let [file, outfile] = &testcase("unsafe_calls_panic_no_tag");
+    should_panic(file, outfile);
 }

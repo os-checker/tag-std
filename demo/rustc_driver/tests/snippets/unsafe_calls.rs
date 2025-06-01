@@ -5,13 +5,13 @@
 
 pub fn tag_expr() {
     unsafe {
-        #[Safety::tag_expr]
+        #[Safety::tag_expr(Tag)]
         call()
     };
 }
 
 pub fn tag_block() {
-    #[Safety::tag_block]
+    #[Safety::tag_block(Tag)]
     unsafe {
         call();
     }
@@ -20,33 +20,7 @@ pub fn tag_block() {
 #[Safety::inner(Tag)]
 unsafe fn call() {}
 
-#[Safety::tag_unsafe_fn]
+#[Safety::tag_unsafe_fn(Tag)]
 unsafe fn tag_unsafe_fn() {
     call();
-}
-
-pub fn assign() {
-    let f = call;
-    #[Safety::assign]
-    unsafe {
-        f()
-    };
-}
-
-pub fn assign_fn_ptr() {
-    let f: unsafe fn() = call;
-    unsafe {
-        #[Safety::assign_fn_ptr]
-        f()
-    };
-}
-
-pub fn no_tag() {
-    unsafe { call() };
-}
-
-mod submod {
-    unsafe fn submod_no_tag() {
-        super::call();
-    }
 }

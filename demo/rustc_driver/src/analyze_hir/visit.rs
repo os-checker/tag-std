@@ -20,6 +20,7 @@ impl Call {
     pub fn get_all_attrs(&self, fn_hir_id: HirId, safety_attrs: &mut FnToolAttrs) {
         let tcx = safety_attrs.tcx;
         let tags = safety_attrs.get_or_insert_tags(self.def_id);
+        dbg!(&tags);
 
         let mut print = |hir_id: HirId| {
             eprintln!("hir_id={hir_id:?} fn_hir_id={fn_hir_id:?}");
@@ -30,16 +31,21 @@ impl Call {
                 let tag = SafetyAttr::new(attr)
                     .unwrap_or_else(|| panic!("{attr:?} should contain an Ident to discharge"))
                     .property;
+                dbg!(tag);
                 let Some(state) = tags.get_mut(&tag) else {
                     panic!("tag {tag} doesn't belong to tags {tags:?}")
                 };
                 assert!(!*state, "{tag} has already been discharged");
                 *state = true;
             }
-            for (tag, state) in &*tags {
-                assert!(*state, "{tag:?} is not discharged");
+            let is_empty = attrs.is_empty();
+            if !is_empty {
+                // only checks if Safety tags exist
+                for (tag, state) in &*tags {
+                    assert!(*state, "{tag:?} is not discharged");
+                }
             }
-            attrs.is_empty()
+            is_empty
         };
         print(self.hir_id);
 
@@ -52,6 +58,11 @@ impl Call {
             if !empty || parent == fn_hir_id {
                 break;
             }
+        }
+
+        // make sure Safety tags are all discharged
+        for (tag, state) in &*tags {
+            assert!(*state, "{tag:?} is not discharged");
         }
     }
 }
