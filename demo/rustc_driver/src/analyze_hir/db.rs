@@ -1,6 +1,6 @@
 pub struct Data {
     pub hash: PrimaryKey,
-    pub tool_attrs: ToolAttrs,
+    pub func: Func,
 }
 
 pub struct PrimaryKey {
@@ -8,6 +8,11 @@ pub struct PrimaryKey {
     pub hash2: u64,
 }
 
-pub struct ToolAttrs {
-    pub inner: Vec<String>,
+pub struct Func {
+    /// Safety tool attributes
+    pub tool_attrs: Vec<String>,
+    /// Definition path (for debug purpose)
+    pub def_path: String,
+    /// Function source code without attributes (for debug purpose)
+    pub function: String,
 }
