@@ -1,10 +1,9 @@
 use crate::REGISTER_TOOL;
-use rustc_hir::{Attribute, BodyId, Expr, ExprKind, FnSig, HirId, ImplItemKind, ItemKind, Node};
-use rustc_middle::ty::{Instance, TyCtxt};
+use rustc_hir::{Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span};
 
 mod db;
-mod reachability;
 mod visit;
 
 pub fn analyze_hir(tcx: TyCtxt) {
