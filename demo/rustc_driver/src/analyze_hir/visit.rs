@@ -17,9 +17,9 @@ pub struct Call {
 }
 
 impl Call {
-    pub fn get_all_attrs(&self, body_hir_id: HirId, tcx: TyCtxt) {
+    pub fn get_all_attrs(&self, fn_hir_id: HirId, tcx: TyCtxt) {
         let print = |hir_id: HirId| {
-            eprintln!("hir_id={hir_id:?} body_hir_id={body_hir_id:?}");
+            eprintln!("hir_id={hir_id:?} fn_hir_id={fn_hir_id:?}");
             let mut empty = true;
             for attr in tcx.hir_attrs(hir_id).iter().filter(is_tool_attr) {
                 eprintln!("{hir_id:?} {}", attribute_to_string(&tcx, attr));
@@ -32,7 +32,7 @@ impl Call {
         for parent in tcx.hir_parent_id_iter(self.hir_id) {
             let empty = print(parent);
             // stop at first tool attrs
-            if !empty || parent == body_hir_id {
+            if !empty || parent == fn_hir_id {
                 break;
             }
         }

@@ -49,9 +49,8 @@ pub fn analyze_hir(tcx: TyCtxt) {
         let unsafe_calls = calls.get_unsafe_calls();
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);
-            let body_hir_id = body.hir_id;
             for call in &unsafe_calls {
-                call.get_all_attrs(body_hir_id, tcx);
+                call.get_all_attrs(hir_fn.hir_id, tcx);
             }
         }
     }

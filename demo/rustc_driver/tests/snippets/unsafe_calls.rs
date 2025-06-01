@@ -39,3 +39,7 @@ pub fn assign_fn_ptr() {
         f()
     };
 }
+
+pub fn no_tag() {
+    unsafe { call() };
+}
