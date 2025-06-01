@@ -43,3 +43,9 @@ pub fn assign_fn_ptr() {
 pub fn no_tag() {
     unsafe { call() };
 }
+
+mod submod {
+    unsafe fn submod_no_tag() {
+        super::call();
+    }
+}

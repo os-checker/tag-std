@@ -31,7 +31,10 @@ impl Call {
 
         for parent in tcx.hir_parent_id_iter(self.hir_id) {
             let empty = print(parent);
-            // stop at first tool attrs
+            // Stop at first tool attrs or the function item.
+            // For a function inside a nested module, hir_parent_id_iter
+            // will pop up to the crate root, thus it's necessary to
+            // stop when reaching the fn item.
             if !empty || parent == fn_hir_id {
                 break;
             }
