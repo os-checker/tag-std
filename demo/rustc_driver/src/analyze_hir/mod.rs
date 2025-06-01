@@ -1,5 +1,9 @@
 use crate::REGISTER_TOOL;
-use rustc_hir::{Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node};
+use rustc_ast::MetaItemInner;
+use rustc_data_structures::fx::FxIndexMap;
+use rustc_hir::{
+    AttrItem, Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node, def_id::DefId,
+};
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span};
 
@@ -7,6 +11,8 @@ mod db;
 mod visit;
 
 pub fn analyze_hir(tcx: TyCtxt) {
+    let mut safety_attrs = FnToolAttrs::new(tcx);
+
     let def_items = tcx.hir_crate_items(()).definitions();
     for local_def_id in def_items {
         let node = tcx.hir_node_by_def_id(local_def_id);
@@ -51,7 +57,7 @@ pub fn analyze_hir(tcx: TyCtxt) {
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);
             for call in &unsafe_calls {
-                call.get_all_attrs(hir_fn.hir_id, tcx);
+                call.get_all_attrs(hir_fn.hir_id, &mut safety_attrs);
             }
         }
     }
@@ -72,4 +78,52 @@ struct HirFn<'hir> {
     sig: FnSig<'hir>,
     body: BodyId,
     span: Span,
+}
+
+struct FnToolAttrs<'tcx> {
+    tcx: TyCtxt<'tcx>,
+    map: FxIndexMap<DefId, Vec<SafetyAttr<'tcx>>>,
+    /// State of safety tags shows if thet are discharged.
+    tagged: FxIndexMap<Ident, bool>,
+}
+
+impl<'tcx> FnToolAttrs<'tcx> {
+    fn new(tcx: TyCtxt<'tcx>) -> Self {
+        Self { tcx, map: FxIndexMap::default(), tagged: FxIndexMap::default() }
+    }
+
+    fn get_or_insert(&mut self, did: DefId) -> &[SafetyAttr<'tcx>] {
+        self.map
+            .entry(did)
+            .or_insert_with(|| self.tcx.get_all_attrs(did).filter_map(SafetyAttr::new).collect())
+    }
+
+    fn get_or_insert_tags(&mut self, did: DefId) -> &mut FxIndexMap<Ident, bool> {
+        self.tagged.clear();
+        let tags: Vec<_> =
+            self.get_or_insert(did).iter().map(|attr| (attr.property, false)).collect();
+        self.tagged.extend(tags);
+        &mut self.tagged
+    }
+}
+
+struct SafetyAttr<'tcx> {
+    attr_item: &'tcx AttrItem,
+    property: Ident,
+}
+
+impl<'tcx> SafetyAttr<'tcx> {
+    fn new(attr: &Attribute) -> Option<SafetyAttr> {
+        if let MetaItemInner::MetaItem(meta) = attr.meta_item_list()?.first()? {
+            // #[Safety::path(Property)]
+            let property = dbg!(meta).ident()?;
+            dbg!(property);
+            if let Attribute::Unparsed(tool_attr) = attr {
+                if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
+                    return Some(SafetyAttr { attr_item: tool_attr, property });
+                }
+            }
+        }
+        None
+    }
 }

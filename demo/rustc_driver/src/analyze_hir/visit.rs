@@ -1,4 +1,4 @@
-use super::is_tool_attr;
+use super::{FnToolAttrs, SafetyAttr, is_tool_attr};
 use rustc_hir::{
     def::{DefKind, Res},
     def_id::DefId,
@@ -17,15 +17,29 @@ pub struct Call {
 }
 
 impl Call {
-    pub fn get_all_attrs(&self, fn_hir_id: HirId, tcx: TyCtxt) {
-        let print = |hir_id: HirId| {
+    pub fn get_all_attrs(&self, fn_hir_id: HirId, safety_attrs: &mut FnToolAttrs) {
+        let tcx = safety_attrs.tcx;
+        let tags = safety_attrs.get_or_insert_tags(self.def_id);
+
+        let mut print = |hir_id: HirId| {
             eprintln!("hir_id={hir_id:?} fn_hir_id={fn_hir_id:?}");
-            let mut empty = true;
-            for attr in tcx.hir_attrs(hir_id).iter().filter(is_tool_attr) {
+
+            let attrs: Vec<_> = tcx.hir_attrs(hir_id).iter().filter(is_tool_attr).collect();
+            for attr in &attrs {
                 eprintln!("{hir_id:?} {}", attribute_to_string(&tcx, attr));
-                empty = false;
+                let tag = SafetyAttr::new(attr)
+                    .unwrap_or_else(|| panic!("{attr:?} should contain an Ident to discharge"))
+                    .property;
+                let Some(state) = tags.get_mut(&tag) else {
+                    panic!("tag {tag} doesn't belong to tags {tags:?}")
+                };
+                assert!(!*state, "{tag} has already been discharged");
+                *state = true;
             }
-            empty
+            for (tag, state) in &*tags {
+                assert!(*state, "{tag:?} is not discharged");
+            }
+            attrs.is_empty()
         };
         print(self.hir_id);
 

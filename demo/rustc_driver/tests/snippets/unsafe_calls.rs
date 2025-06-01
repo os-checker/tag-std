@@ -17,6 +17,7 @@ pub fn tag_block() {
     }
 }
 
+#[Safety::inner(Tag)]
 unsafe fn call() {}
 
 #[Safety::tag_unsafe_fn]
