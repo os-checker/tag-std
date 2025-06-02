@@ -1,18 +1,13 @@
 stdout=
-+++++ call (def_path="unsafe_calls_panic_assign_fn_ptr[3540]::call" hash=3540a14b61c5b5ce-a55a31071d265cc) (./tests/snippets/unsafe_calls_panic_assign_fn_ptr.rs:6:1: 6:22 (#0)) +++++
- => "#[Safety::inner(Tag)]\n"
-
 
 stderr=
-unsafe fn call() { }
-fn assign_fn_ptr() { let f: unsafe fn() = call; unsafe { f() }; }
-[src/analyze_hir/mod.rs:58:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:48:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:3 ~ unsafe_calls_panic_assign_fn_ptr[3540]::assign_fn_ptr).4),
         def_id: DefId(0:4 ~ unsafe_calls_panic_assign_fn_ptr[3540]::call),
     },
 ]
-[src/analyze_hir/mod.rs:119:28] meta = MetaItem {
+[src/analyze_hir/mod.rs:112:28] meta = MetaItem {
     unsafety: Default,
     path: Path {
         span: ./tests/snippets/unsafe_calls_panic_assign_fn_ptr.rs:6:17: 6:20 (#0),
@@ -28,7 +23,7 @@ fn assign_fn_ptr() { let f: unsafe fn() = call; unsafe { f() }; }
     kind: Word,
     span: ./tests/snippets/unsafe_calls_panic_assign_fn_ptr.rs:6:17: 6:20 (#0),
 }
-[src/analyze_hir/mod.rs:120:13] property = Tag#0
+[src/analyze_hir/mod.rs:113:13] property = Tag#0
 [src/analyze_hir/visit.rs:23:9] &tags = {
     Tag#0: false,
 }

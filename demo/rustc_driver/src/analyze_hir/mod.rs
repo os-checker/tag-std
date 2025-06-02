@@ -6,12 +6,13 @@ use rustc_hir::{
     def_id::{DefId, LocalDefId},
 };
 use rustc_middle::ty::TyCtxt;
-use rustc_span::{Ident, Span};
+use rustc_span::Ident;
 
 mod db;
 mod visit;
 
 pub fn analyze_hir(tcx: TyCtxt) {
+    let mut v_hir_fn = Vec::with_capacity(64);
     let mut safety_attrs = FnToolAttrs::new(tcx);
 
     let def_items = tcx.hir_crate_items(()).definitions();
@@ -23,41 +24,22 @@ pub fn analyze_hir(tcx: TyCtxt) {
             Node::Item(item) if matches!(item.kind, ItemKind::Fn { .. }) => {
                 let (name, sig, _generics, body) = item.expect_fn();
                 let sig = *sig;
-                HirFn { tcx, local: local_def_id, hir_id: item.hir_id(), name, sig, body }
+                HirFn { local: local_def_id, hir_id: item.hir_id(), name, sig, body }
             }
             Node::ImplItem(item) if matches!(item.kind, ImplItemKind::Fn(..)) => {
                 let (sig, body) = item.expect_fn();
-                HirFn {
-                    tcx,
-                    local: local_def_id,
-                    hir_id: item.hir_id(),
-                    name: item.ident,
-                    sig: *sig,
-                    body,
-                }
+                let hir_id = item.hir_id();
+                HirFn { local: local_def_id, hir_id, name: item.ident, sig: *sig, body }
             }
             _ => continue,
         };
 
-        let attrs = tcx.hir_attrs(hir_fn.hir_id);
+        v_hir_fn.push(hir_fn);
+    }
 
-        let tool_attrs = attrs.iter().filter(is_tool_attr);
+    // TODO: save Data to and read Data from db across crates.
 
-        let def_id = local_def_id.to_def_id();
-        let def_path = tcx.def_path_debug_str(def_id);
-        let hash = tcx.def_path_hash(def_id).0;
-
-        for attr in tool_attrs {
-            println!(
-                "+++++ {fn_name} (def_path={def_path:?} hash={hash}) ({span:?}) +++++\n => {attr:?}\n",
-                fn_name = hir_fn.name,
-                span = attr.span(),
-                attr = rustc_hir_pretty::attribute_to_string(&tcx, attr)
-            );
-        }
-
-        // eprintln!("{}", rustc_hir_pretty::id_to_string(&tcx, hir_fn.hir_id));
-
+    for hir_fn in &v_hir_fn {
         // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
         let calls = visit::get_calls(tcx, body);
@@ -81,7 +63,6 @@ fn is_tool_attr(attr: &&Attribute) -> bool {
 }
 
 struct HirFn<'hir> {
-    tcx: TyCtxt<'hir>,
     local: LocalDefId,
     hir_id: HirId,
     name: Ident,
