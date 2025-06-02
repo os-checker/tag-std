@@ -2,7 +2,8 @@ use crate::REGISTER_TOOL;
 use rustc_ast::MetaItemInner;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::{
-    AttrItem, Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node, def_id::DefId,
+    AttrItem, Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node,
+    def_id::{DefId, LocalDefId},
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span};
@@ -22,11 +23,18 @@ pub fn analyze_hir(tcx: TyCtxt) {
             Node::Item(item) if matches!(item.kind, ItemKind::Fn { .. }) => {
                 let (name, sig, _generics, body) = item.expect_fn();
                 let sig = *sig;
-                HirFn { hir_id: item.hir_id(), name, sig, body, span: item.vis_span }
+                HirFn { tcx, local: local_def_id, hir_id: item.hir_id(), name, sig, body }
             }
             Node::ImplItem(item) if matches!(item.kind, ImplItemKind::Fn(..)) => {
                 let (sig, body) = item.expect_fn();
-                HirFn { hir_id: item.hir_id(), name: item.ident, sig: *sig, body, span: item.span }
+                HirFn {
+                    tcx,
+                    local: local_def_id,
+                    hir_id: item.hir_id(),
+                    name: item.ident,
+                    sig: *sig,
+                    body,
+                }
             }
             _ => continue,
         };
@@ -48,7 +56,7 @@ pub fn analyze_hir(tcx: TyCtxt) {
             );
         }
 
-        eprintln!("{}", rustc_hir_pretty::id_to_string(&tcx, hir_fn.hir_id));
+        // eprintln!("{}", rustc_hir_pretty::id_to_string(&tcx, hir_fn.hir_id));
 
         // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
@@ -73,11 +81,12 @@ fn is_tool_attr(attr: &&Attribute) -> bool {
 }
 
 struct HirFn<'hir> {
+    tcx: TyCtxt<'hir>,
+    local: LocalDefId,
     hir_id: HirId,
     name: Ident,
     sig: FnSig<'hir>,
     body: BodyId,
-    span: Span,
 }
 
 struct FnToolAttrs<'tcx> {
@@ -100,8 +109,11 @@ impl<'tcx> FnToolAttrs<'tcx> {
 
     fn get_or_insert_tags(&mut self, did: DefId) -> &mut FxIndexMap<Ident, bool> {
         self.tagged.clear();
-        let tags: Vec<_> =
-            self.get_or_insert(did).iter().map(|attr| (attr.property, false)).collect();
+        let entry = self.map.entry(did);
+        let tags = entry
+            .or_insert_with(|| self.tcx.get_all_attrs(did).filter_map(SafetyAttr::new).collect())
+            .iter()
+            .map(|attr| (attr.property, false));
         self.tagged.extend(tags);
         &mut self.tagged
     }
