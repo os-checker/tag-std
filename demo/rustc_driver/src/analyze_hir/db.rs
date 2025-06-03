@@ -2,7 +2,6 @@ mod storage;
 pub use storage::Database;
 
 use super::{HirFn, is_tool_attr};
-use jiff::Timestamp;
 use rustc_hir::def_id::DefId;
 use rustc_middle::ty::TyCtxt;
 
@@ -46,7 +45,7 @@ impl Data {
                 .hir_attrs(hid)
                 .iter()
                 .filter(is_tool_attr)
-                .map(|attr| rustc_hir_pretty::attribute_to_string(&tcx, attr))
+                .map(|attr| attribute_to_string(tcx, attr))
                 .collect(),
             def_path: tcx.def_path_debug_str(def_id),
             function: rustc_hir_pretty::id_to_string(&tcx, hid),
@@ -54,4 +53,8 @@ impl Data {
 
         Data { hash, func }
     }
+}
+
+fn attribute_to_string(tcx: TyCtxt<'_>, attr: &rustc_hir::Attribute) -> String {
+    rustc_hir_pretty::attribute_to_string(&tcx, attr).trim().to_owned()
 }
