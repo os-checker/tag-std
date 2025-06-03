@@ -525,6 +525,7 @@ dependencies = [
  "jiff",
  "prettyplease",
  "rusqlite",
+ "safety-tool-parser",
  "serde",
  "serde_json",
  "tracing",

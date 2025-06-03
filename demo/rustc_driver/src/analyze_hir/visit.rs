@@ -1,11 +1,10 @@
-use super::{FnToolAttrs, SafetyAttr, is_tool_attr};
+use super::db::{Property, ToolAttrs};
 use rustc_hir::{
     def::{DefKind, Res},
     def_id::DefId,
     intravisit::*,
     *,
 };
-use rustc_hir_pretty::attribute_to_string;
 use rustc_middle::ty::TyCtxt;
 
 #[derive(Debug)]
@@ -17,31 +16,29 @@ pub struct Call {
 }
 
 impl Call {
-    pub fn get_all_attrs(&self, fn_hir_id: HirId, safety_attrs: &mut FnToolAttrs) {
-        let tcx = safety_attrs.tcx;
-        let tags = safety_attrs.get_or_insert_tags(self.def_id);
-        dbg!(&tags);
+    pub fn check_tool_attrs(&self, fn_hir_id: HirId, tcx: TyCtxt, tool_attrs: &mut ToolAttrs) {
+        let Some(tags_state) = tool_attrs.get_tags(self.def_id, tcx) else {
+            // No tool attrs to be checked.
+            return;
+        };
+        dbg!(&tags_state);
 
         let mut print = |hir_id: HirId| {
             eprintln!("hir_id={hir_id:?} fn_hir_id={fn_hir_id:?}");
 
-            let attrs: Vec<_> = tcx.hir_attrs(hir_id).iter().filter(is_tool_attr).collect();
-            for attr in &attrs {
-                eprintln!("{hir_id:?} {}", attribute_to_string(&tcx, attr));
-                let tag = SafetyAttr::new(attr)
-                    .unwrap_or_else(|| panic!("{attr:?} should contain an Ident to discharge"))
-                    .property;
-                dbg!(tag);
-                let Some(state) = tags.get_mut(&tag) else {
-                    panic!("tag {tag} doesn't belong to tags {tags:?}")
+            let properties = Property::new_with_hir_id(hir_id, tcx);
+
+            for tag in &properties {
+                let Some(state) = tags_state.get_mut(tag) else {
+                    panic!("tag {tag:?} doesn't belong to tags {tags_state:?}")
                 };
-                assert!(!*state, "{tag} has already been discharged");
+                assert!(!*state, "{tag:?} has already been discharged");
                 *state = true;
             }
-            let is_empty = attrs.is_empty();
+            let is_empty = properties.is_empty();
             if !is_empty {
                 // only checks if Safety tags exist
-                for (tag, state) in &*tags {
+                for (tag, state) in &*tags_state {
                     assert!(*state, "{tag:?} is not discharged");
                 }
             }
@@ -61,7 +58,7 @@ impl Call {
         }
 
         // make sure Safety tags are all discharged
-        for (tag, state) in &*tags {
+        for (tag, state) in &*tags_state {
             assert!(*state, "{tag:?} is not discharged");
         }
     }

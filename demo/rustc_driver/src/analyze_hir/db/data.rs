@@ -1,6 +1,8 @@
 use super::super::{HirFn, is_tool_attr};
-use rustc_hir::def_id::DefId;
+use rustc_data_structures::fx::FxIndexMap;
+use rustc_hir::{HirId, def_id::DefId};
 use rustc_middle::ty::TyCtxt;
+use safety_tool_parser::syn;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PrimaryKey {
@@ -41,8 +43,7 @@ impl Data {
             tool_attrs: tcx
                 .hir_attrs(hid)
                 .iter()
-                .filter(is_tool_attr)
-                .map(|attr| attribute_to_string(tcx, attr))
+                .filter_map(|attr| opt_attribute_to_string(tcx, attr))
                 .collect(),
             def_path: tcx.def_path_debug_str(def_id),
             function: rustc_hir_pretty::id_to_string(&tcx, hid),
@@ -52,6 +53,105 @@ impl Data {
     }
 }
 
+fn opt_attribute_to_string(tcx: TyCtxt<'_>, attr: &rustc_hir::Attribute) -> Option<String> {
+    is_tool_attr(attr).then(|| attribute_to_string(tcx, attr))
+}
+
 fn attribute_to_string(tcx: TyCtxt<'_>, attr: &rustc_hir::Attribute) -> String {
     rustc_hir_pretty::attribute_to_string(&tcx, attr).trim().to_owned()
+}
+
+pub type TagsState = FxIndexMap<Property, bool>;
+
+#[derive(Debug, Default)]
+pub struct ToolAttrs {
+    map: FxIndexMap<PrimaryKey, Box<[Property]>>,
+    /// State of safety tags shows if thet are discharged.
+    tagged: TagsState,
+}
+
+impl ToolAttrs {
+    pub fn new(data: &[Data]) -> Self {
+        Self {
+            map: data
+                .iter()
+                .filter(|d| !d.func.tool_attrs.is_empty())
+                .map(|d| {
+                    let mut v = Vec::with_capacity(d.func.tool_attrs.len());
+                    d.func.tool_attrs.iter().for_each(|s| push_properties(s, &mut v));
+                    (d.hash, v.into_boxed_slice())
+                })
+                .collect(),
+            tagged: FxIndexMap::default(),
+        }
+    }
+
+    pub fn get_tags(&mut self, def_id: DefId, tcx: TyCtxt) -> Option<&mut TagsState> {
+        let key = PrimaryKey::new(def_id, tcx);
+        self.get_tags_via_key(key)
+    }
+
+    fn get_tags_via_key(&mut self, key: PrimaryKey) -> Option<&mut TagsState> {
+        let properties = self.map.get(&key)?;
+        self.tagged.clear();
+        self.tagged.extend(properties.iter().map(|p| (p.clone(), false)));
+        Some(&mut self.tagged)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Property {
+    property: Box<str>,
+}
+
+impl Property {
+    pub fn new_with_hir_id(hir_id: HirId, tcx: TyCtxt) -> Vec<Self> {
+        let mut v = Vec::new();
+
+        for s in tcx.hir_attrs(hir_id).iter().filter_map(|attr| opt_attribute_to_string(tcx, attr))
+        {
+            push_properties(&s, &mut v);
+        }
+
+        v
+    }
+}
+
+fn push_properties(s: &str, v: &mut Vec<Property>) {
+    use syn::parse::{Parse, Parser};
+
+    let Ok(attrs) = syn::Attribute::parse_outer
+        .parse_str(s)
+        .map_err(|err| eprintln!("Failed to parse Attributes:\nerr={err}\nattr={s:?}"))
+    else {
+        return;
+    };
+
+    for attr in attrs {
+        if let Ok(arg) = attr.parse_args::<AttrArg>() {
+            let property = arg.ident.to_string().into();
+            v.push(Property { property });
+        }
+    }
+
+    struct AttrArg {
+        ident: syn::Ident,
+    }
+
+    impl Parse for AttrArg {
+        fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+            Ok(AttrArg { ident: input.parse()? })
+        }
+    }
+
+    // if let MetaItemInner::MetaItem(meta) = attr.meta_item_list()?.first()? {
+    //     // #[Safety::path(Property)]
+    //     let property = dbg!(meta).ident()?;
+    //     dbg!(property);
+    //     if let Attribute::Unparsed(tool_attr) = attr {
+    //         if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
+    //             return Some(SafetyAttr { attr_item: tool_attr, property });
+    //         }
+    //     }
+    // }
 }

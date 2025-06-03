@@ -1,9 +1,6 @@
 use crate::{REGISTER_TOOL, Result};
-use rustc_ast::MetaItemInner;
-use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::{
-    AttrItem, Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node,
-    def_id::{DefId, LocalDefId},
+    Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node, def_id::LocalDefId,
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_span::Ident;
@@ -13,7 +10,6 @@ mod visit;
 
 pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
     let mut v_hir_fn = Vec::with_capacity(64);
-    let mut safety_attrs = FnToolAttrs::new(tcx);
 
     let def_items = tcx.hir_crate_items(()).definitions();
     for local_def_id in def_items {
@@ -37,22 +33,17 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
         v_hir_fn.push(hir_fn);
     }
 
-    let data = {
-        let mut db = db::Database::new("data.sqlite3")?;
-        let iter = v_hir_fn.iter().map(|hir_fn| db::Data::new(hir_fn, tcx));
-        db.save_data(iter)?;
-        db.get_all_data()?
-    };
+    let mut tool_attrs =
+        db::get_all_tool_attrs(v_hir_fn.iter().filter_map(|f| f.to_data(tcx))).unwrap();
 
     for hir_fn in &v_hir_fn {
-        // look in the body
         let body = tcx.hir_body(hir_fn.body).value;
         let calls = visit::get_calls(tcx, body);
         let unsafe_calls = calls.get_unsafe_calls();
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);
             for call in &unsafe_calls {
-                call.get_all_attrs(hir_fn.hir_id, &mut safety_attrs);
+                call.check_tool_attrs(hir_fn.hir_id, tcx, &mut tool_attrs);
             }
         }
     }
@@ -60,7 +51,7 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
     Ok(())
 }
 
-fn is_tool_attr(attr: &&Attribute) -> bool {
+fn is_tool_attr(attr: &Attribute) -> bool {
     if let Attribute::Unparsed(tool_attr) = attr {
         if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
             return true;
@@ -69,6 +60,7 @@ fn is_tool_attr(attr: &&Attribute) -> bool {
     false
 }
 
+#[allow(dead_code)]
 struct HirFn<'hir> {
     local: LocalDefId,
     hir_id: HirId,
@@ -77,53 +69,12 @@ struct HirFn<'hir> {
     body: BodyId,
 }
 
-struct FnToolAttrs<'tcx> {
-    tcx: TyCtxt<'tcx>,
-    map: FxIndexMap<DefId, Vec<SafetyAttr<'tcx>>>,
-    /// State of safety tags shows if thet are discharged.
-    tagged: FxIndexMap<Ident, bool>,
-}
-
-impl<'tcx> FnToolAttrs<'tcx> {
-    fn new(tcx: TyCtxt<'tcx>) -> Self {
-        Self { tcx, map: FxIndexMap::default(), tagged: FxIndexMap::default() }
+impl HirFn<'_> {
+    fn has_tool_attrs(&self, tcx: TyCtxt) -> bool {
+        tcx.hir_attrs(self.hir_id).iter().any(is_tool_attr)
     }
 
-    fn get_or_insert(&mut self, did: DefId) -> &[SafetyAttr<'tcx>] {
-        self.map
-            .entry(did)
-            .or_insert_with(|| self.tcx.get_all_attrs(did).filter_map(SafetyAttr::new).collect())
-    }
-
-    fn get_or_insert_tags(&mut self, did: DefId) -> &mut FxIndexMap<Ident, bool> {
-        self.tagged.clear();
-        let entry = self.map.entry(did);
-        let tags = entry
-            .or_insert_with(|| self.tcx.get_all_attrs(did).filter_map(SafetyAttr::new).collect())
-            .iter()
-            .map(|attr| (attr.property, false));
-        self.tagged.extend(tags);
-        &mut self.tagged
-    }
-}
-
-struct SafetyAttr<'tcx> {
-    attr_item: &'tcx AttrItem,
-    property: Ident,
-}
-
-impl<'tcx> SafetyAttr<'tcx> {
-    fn new(attr: &Attribute) -> Option<SafetyAttr> {
-        if let MetaItemInner::MetaItem(meta) = attr.meta_item_list()?.first()? {
-            // #[Safety::path(Property)]
-            let property = dbg!(meta).ident()?;
-            dbg!(property);
-            if let Attribute::Unparsed(tool_attr) = attr {
-                if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
-                    return Some(SafetyAttr { attr_item: tool_attr, property });
-                }
-            }
-        }
-        None
+    fn to_data(&self, tcx: TyCtxt) -> Option<db::Data> {
+        self.has_tool_attrs(tcx).then(|| db::Data::new(self, tcx))
     }
 }

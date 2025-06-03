@@ -14,6 +14,8 @@ serde_json = "1"
 prettyplease = "0.2"
 jiff = { version = "0.2", features = ["serde"] }
 
+safety-tool-parser = { path = "./safety-tool-parser/" }
+
 # error handling
 eyre = "0.6"
 color-eyre = "0.6"
