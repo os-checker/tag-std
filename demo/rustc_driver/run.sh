@@ -3,6 +3,8 @@ set -o pipefail
 
 # Set up toolchain: works under current folder.
 export LD_LIBRARY_PATH=$(rustc --print sysroot)/lib
+# Don't emit rlib files.
+export STOP_COMPILATION=1
 
 cargo fmt --check --all
 cargo clippy --workspace -- -D clippy::all
