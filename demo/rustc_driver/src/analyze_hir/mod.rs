@@ -1,4 +1,4 @@
-use crate::REGISTER_TOOL;
+use crate::{REGISTER_TOOL, Result};
 use rustc_ast::MetaItemInner;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::{
@@ -11,7 +11,7 @@ use rustc_span::Ident;
 mod db;
 mod visit;
 
-pub fn analyze_hir(tcx: TyCtxt) {
+pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
     let mut v_hir_fn = Vec::with_capacity(64);
     let mut safety_attrs = FnToolAttrs::new(tcx);
 
@@ -37,7 +37,12 @@ pub fn analyze_hir(tcx: TyCtxt) {
         v_hir_fn.push(hir_fn);
     }
 
-    // TODO: save Data to and read Data from db across crates.
+    let data = {
+        let mut db = db::Database::new("data.sqlite3")?;
+        let iter = v_hir_fn.iter().map(|hir_fn| db::Data::new(hir_fn, tcx));
+        db.save_data(iter)?;
+        db.get_all_data()?
+    };
 
     for hir_fn in &v_hir_fn {
         // look in the body
@@ -51,6 +56,8 @@ pub fn analyze_hir(tcx: TyCtxt) {
             }
         }
     }
+
+    Ok(())
 }
 
 fn is_tool_attr(attr: &&Attribute) -> bool {

@@ -47,7 +47,7 @@ fn main() {
         ControlFlow::<(), ()>::Continue(())
     };
     _ = run_with_tcx!(&rustc_args, |tcx| {
-        analyze_hir::analyze_hir(tcx);
+        analyze_hir::analyze_hir(tcx).unwrap();
         analyze(tcx);
 
         ret

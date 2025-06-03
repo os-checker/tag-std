@@ -1,4 +1,5 @@
 mod storage;
+pub use storage::Database;
 
 use super::{HirFn, is_tool_attr};
 use jiff::Timestamp;
