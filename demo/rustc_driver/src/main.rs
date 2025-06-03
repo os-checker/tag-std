@@ -28,8 +28,17 @@ use stable_mir::{
 use std::ops::ControlFlow;
 
 mod analyze_hir;
+mod logger;
+
+use eyre::Result;
+#[macro_use]
+extern crate eyre;
+#[macro_use]
+extern crate tracing;
 
 fn main() {
+    logger::init();
+
     let rustc_args: Vec<_> = std::env::args().collect();
     // When STOP_COMPILATION is set to non-0, stop compiling.
     let ret = if std::env::var("STOP_COMPILATION").map(|s| s != "0").unwrap_or(false) {
