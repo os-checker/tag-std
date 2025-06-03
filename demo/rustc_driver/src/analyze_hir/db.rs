@@ -18,6 +18,7 @@ impl PrimaryKey {
     }
 }
 
+#[derive(Debug)]
 pub struct Func {
     /// Safety tool attributes
     pub tool_attrs: Vec<String>,
@@ -27,6 +28,7 @@ pub struct Func {
     pub function: String,
 }
 
+#[derive(Debug)]
 pub struct Data {
     pub hash: PrimaryKey,
     pub func: Func,

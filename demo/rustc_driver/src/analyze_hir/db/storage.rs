@@ -1,4 +1,4 @@
-use super::Data;
+use super::{Data, Func, PrimaryKey};
 use crate::Result;
 use eyre::Context;
 use rusqlite::{Connection, named_params};
@@ -50,11 +50,32 @@ VALUES (:hash1, :hash2, :tool_attrs, :def_path, :function, :timestamp)
 
         Ok(())
     }
+
+    pub fn get_all_data(&mut self) -> Result<Vec<Data>> {
+        const QUERY: &str = "
+SELECT hash1, hash2, tool_attrs, def_path, function FROM hir
+";
+        let mut stmt = self.conn.prepare(QUERY)?;
+        stmt.query_and_then([], |row| {
+            eyre::Ok(Data {
+                hash: PrimaryKey {
+                    hash1: row.get::<_, i64>(0)?.cast_unsigned(),
+                    hash2: row.get::<_, i64>(1)?.cast_unsigned(),
+                },
+                func: Func {
+                    tool_attrs: serde_json::from_str(row.get_ref(2)?.as_str()?)?,
+                    def_path: row.get(3)?,
+                    function: row.get(4)?,
+                },
+            })
+        })?
+        .collect()
+    }
 }
 
 #[test]
 fn test_db() -> Result<()> {
-    use super::{Func, PrimaryKey};
+    crate::logger::init();
     let mut db = Database::new("a.sqlite3")?;
     db.save_data([Data {
         hash: PrimaryKey { hash1: 1, hash2: 2 },
@@ -63,5 +84,7 @@ fn test_db() -> Result<()> {
             def_path: "a::b".to_owned(),
             function: "fn f() {}".to_owned(),
         },
-    }])
+    }])?;
+    dbg!(db.get_all_data()?);
+    Ok(())
 }
