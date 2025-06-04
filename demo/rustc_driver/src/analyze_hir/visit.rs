@@ -98,7 +98,10 @@ impl Calls<'_> {
     pub fn get_unsafe_calls(&self) -> Vec<&Call> {
         self.calls
             .iter()
-            .filter(|call| self.tcx.fn_sig(call.def_id).skip_binder().safety().is_unsafe())
+            .filter(|call| {
+                dbg!(self.tcx.def_path_debug_str(call.def_id));
+                self.tcx.fn_sig(call.def_id).skip_binder().safety().is_unsafe()
+            })
             .collect()
     }
 }

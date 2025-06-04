@@ -14,22 +14,33 @@ static LD_LIBRARY_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     path
 });
 
-fn compile(file: &str) -> (&'static str, std::process::Output) {
+struct CompilationOptions<'a> {
+    args: &'a [&'a str],
+    stop: bool,
+}
+
+impl Default for CompilationOptions<'_> {
+    fn default() -> Self {
+        Self { args: &["--crate-type=lib"], stop: true }
+    }
+}
+
+fn compile(file: &str, opts: CompilationOptions) -> (&'static str, std::process::Output) {
     let exe = env!("CARGO_PKG_NAME");
-    let output = Command::cargo_bin(exe)
-        .unwrap()
-        .arg(file)
-        .arg("--crate-type=lib")
-        // .arg("--edition=2024")
-        .env("STOP_COMPILATION", "1")
-        .env("LD_LIBRARY_PATH", &*LD_LIBRARY_PATH)
-        .output()
-        .unwrap();
+    let mut cmd = Command::cargo_bin(exe).unwrap();
+
+    cmd.arg(file).args(opts.args).env("LD_LIBRARY_PATH", &*LD_LIBRARY_PATH);
+
+    if opts.stop {
+        cmd.env("STOP_COMPILATION", "1");
+    }
+
+    let output = cmd.output().unwrap();
     (exe, output)
 }
 
-fn should_panic(file: &str, outfile: &str) {
-    let (exe, output) = compile(file);
+fn should_panic(file: &str, outfile: &str, opts: CompilationOptions) {
+    let (exe, output) = compile(file, opts);
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     let stderr = std::str::from_utf8(&output.stderr).unwrap();
     if output.status.success() {
@@ -48,29 +59,23 @@ fn testcase(name: &str) -> [String; 2] {
 #[test]
 fn unsafe_calls_panic_assign() {
     let [file, outfile] = &testcase("unsafe_calls_panic_assign");
-    should_panic(file, outfile);
+    should_panic(file, outfile, Default::default());
 }
 
 #[test]
 fn unsafe_calls_panic_assign_fn_ptr() {
     let [file, outfile] = &testcase("unsafe_calls_panic_assign_fn_ptr");
-    should_panic(file, outfile);
+    should_panic(file, outfile, Default::default());
 }
 
 #[test]
 fn unsafe_calls_panic_no_tag() {
     let [file, outfile] = &testcase("unsafe_calls_panic_no_tag");
-    should_panic(file, outfile);
+    should_panic(file, outfile, Default::default());
 }
 
-#[test]
-fn unsafe_calls() {
-    let [file, outfile] = &testcase("unsafe_calls");
-    fine(file, outfile);
-}
-
-fn fine(file: &str, outfile: &str) {
-    let (exe, output) = compile(file);
+fn fine(file: &str, outfile: &str, opts: CompilationOptions) {
+    let (exe, output) = compile(file, opts);
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     let stderr = std::str::from_utf8(&output.stderr).unwrap();
     if !output.status.success() {
@@ -78,4 +83,42 @@ fn fine(file: &str, outfile: &str) {
     }
     let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
     expect_file![outfile].assert_eq(&out);
+}
+
+#[test]
+fn unsafe_calls() {
+    let [file, outfile] = &testcase("unsafe_calls");
+    fine(file, outfile, Default::default());
+}
+
+#[test]
+fn unsafe_calls_with_dep() {
+    let opts = compile_libunsafe_calls();
+
+    let [file, outfile] = &testcase("unsafe_calls_with_dep");
+    fine(file, outfile, opts);
+}
+
+fn compile_libunsafe_calls() -> CompilationOptions<'static> {
+    let [file, outfile] = &testcase("unsafe_calls");
+    fine(
+        file,
+        outfile,
+        CompilationOptions {
+            args: &["--crate-type=lib", "-otarget/libunsafe_calls.rlib"],
+            stop: false,
+        },
+    );
+    CompilationOptions {
+        args: &["--crate-type=lib", "--extern=unsafe_calls=target/libunsafe_calls.rlib"],
+        ..Default::default()
+    }
+}
+
+#[test]
+fn unsafe_calls_panic_with_dep() {
+    let opts = compile_libunsafe_calls();
+
+    let [file, outfile] = &testcase("unsafe_calls_panic_with_dep");
+    should_panic(file, outfile, opts);
 }

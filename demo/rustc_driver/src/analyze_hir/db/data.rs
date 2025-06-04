@@ -91,6 +91,10 @@ impl ToolAttrs {
         self.get_tags_via_key(key)
     }
 
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
     fn get_tags_via_key(&mut self, key: PrimaryKey) -> Option<&mut TagsState> {
         let properties = self.map.get(&key)?;
         self.tagged.clear();

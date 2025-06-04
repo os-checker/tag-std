@@ -13,17 +13,20 @@
 "test" ("src/lib.rs:9:1: 9:26")
  => "#[Safety::inner(property = Unreachable(), kind = \"precond\")]\n"
 
-"MyStruct::get" ("src/lib.rs:27:5: 27:42")
+"MyStruct::get" ("src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = Init(self.ptr, u8, self.len), kind = \"precond\")]\n"
 
-"MyStruct::get" ("src/lib.rs:27:5: 27:42")
+"MyStruct::get" ("src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = InBound(self.ptr, u8, self.len), kind = \"precond\")]\n"
 
-"MyStruct::get" ("src/lib.rs:27:5: 27:42")
+"MyStruct::get" ("src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = ValidNum(self.len * sizeof(u8), [0, isize :: MAX]),\nkind = \"precond\")]\n"
 
-"MyStruct::get" ("src/lib.rs:27:5: 27:42")
+"MyStruct::get" ("src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = Alias(self.ptr), kind = \"hazard\")]\n"
+
+"MyStruct::get" ("src/lib.rs:28:5: 28:42")
+ => "#[Safety::inner(property = Unknown(UserProperty), kind = \"memo\", memo =\n\"Customed user property.\")]\n"
 
 "MyStruct::from" ("src/lib.rs:19:5: 19:50")
  => "#[Safety::inner(property = Unknown(UserProperty), kind = \"memo\", memo =\n\"Customed user property.\")]\n"
@@ -32,15 +35,18 @@
 "demo::MyStruct::from" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:19:5: 19:50")
  => "#[Safety::inner(property = Unknown(UserProperty), kind = \"memo\", memo =\n\"Customed user property.\")]\n"
 
-"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:27:5: 27:42")
+"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = Init(self.ptr, u8, self.len), kind = \"precond\")]\n"
 
-"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:27:5: 27:42")
+"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = InBound(self.ptr, u8, self.len), kind = \"precond\")]\n"
 
-"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:27:5: 27:42")
+"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = ValidNum(self.len * sizeof(u8), [0, isize :: MAX]),\nkind = \"precond\")]\n"
 
-"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:27:5: 27:42")
+"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:28:5: 28:42")
  => "#[Safety::inner(property = Alias(self.ptr), kind = \"hazard\")]\n"
+
+"demo::MyStruct::get" ("/home/gh-zjp-CN/tag-std/demo/rustc_driver/tests/basic/src/lib.rs:28:5: 28:42")
+ => "#[Safety::inner(property = Unknown(UserProperty), kind = \"memo\", memo =\n\"Customed user property.\")]\n"
 

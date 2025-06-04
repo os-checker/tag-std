@@ -21,6 +21,6 @@ pub fn tag_block() {
 unsafe fn call() {}
 
 #[Safety::tag_unsafe_fn(property = Memo(Tag), kind = "memo")]
-unsafe fn tag_unsafe_fn() {
+pub unsafe fn tag_unsafe_fn() {
     call();
 }

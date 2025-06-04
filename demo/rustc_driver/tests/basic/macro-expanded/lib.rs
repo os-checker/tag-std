@@ -39,6 +39,13 @@ impl MyStruct {
     )]
     /// Alias: Make sure self.ptr must not have other alias after calling this function.
     #[Safety::inner(property = Alias(self.ptr), kind = "hazard")]
+    /// UserProperty: auto doc placeholder.
+    /// Customed user property.
+    #[Safety::inner(
+        property = Unknown(UserProperty),
+        kind = "memo",
+        memo = "Customed user property."
+    )]
     pub unsafe fn get(&self) -> &mut [u8] {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.len) }
     }
