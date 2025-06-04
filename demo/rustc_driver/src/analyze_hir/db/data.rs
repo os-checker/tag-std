@@ -2,7 +2,7 @@ use super::super::{HirFn, is_tool_attr};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::{HirId, def_id::DefId};
 use rustc_middle::ty::TyCtxt;
-use safety_tool_parser::syn;
+use safety_tool_parser::property_attr::{expr_ident, parse_inner_attr, property::Kind};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PrimaryKey {
@@ -118,29 +118,10 @@ impl Property {
 }
 
 fn push_properties(s: &str, v: &mut Vec<Property>) {
-    use syn::parse::{Parse, Parser};
-
-    let Ok(attrs) = syn::Attribute::parse_outer
-        .parse_str(s)
-        .map_err(|err| eprintln!("Failed to parse Attributes:\nerr={err}\nattr={s:?}"))
-    else {
-        return;
-    };
-
-    for attr in attrs {
-        if let Ok(arg) = attr.parse_args::<AttrArg>() {
-            let property = arg.ident.to_string().into();
-            v.push(Property { property });
-        }
-    }
-
-    struct AttrArg {
-        ident: syn::Ident,
-    }
-
-    impl Parse for AttrArg {
-        fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-            Ok(AttrArg { ident: input.parse()? })
+    if let Some(property) = parse_inner_attr(s) {
+        if property.kind == Kind::Memo {
+            let s = expr_ident(&property.expr[0]).to_string();
+            v.push(Property { property: s.into_boxed_str() })
         }
     }
 }

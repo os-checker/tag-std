@@ -5,22 +5,22 @@
 
 pub fn tag_expr() {
     unsafe {
-        #[Safety::tag_expr(Tag)]
+        #[Safety::tag_expr(property = Memo(Tag), kind = "memo")]
         call()
     };
 }
 
 pub fn tag_block() {
-    #[Safety::tag_block(Tag)]
+    #[Safety::tag_block(property = Memo(Tag), kind = "memo")]
     unsafe {
         call();
     }
 }
 
-#[Safety::inner(Tag)]
+#[Safety::inner(property = Memo(Tag), kind = "memo")]
 unsafe fn call() {}
 
-#[Safety::tag_unsafe_fn(Tag)]
+#[Safety::tag_unsafe_fn(property = Memo(Tag), kind = "memo")]
 unsafe fn tag_unsafe_fn() {
     call();
 }

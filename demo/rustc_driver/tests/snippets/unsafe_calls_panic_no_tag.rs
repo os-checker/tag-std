@@ -3,7 +3,7 @@
 #![register_tool(Safety)]
 #![allow(dead_code)]
 
-#[Safety::inner(Tag)]
+#[Safety::inner(property = Memo(Tag), kind = "memo")]
 unsafe fn call() {}
 
 // No tag cases should really panic.

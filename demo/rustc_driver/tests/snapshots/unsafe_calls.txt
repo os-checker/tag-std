@@ -1,10 +1,10 @@
 stdout=
 ********* "unsafe_calls" [Rlib] has reached 4 instances *********
 "tag_unsafe_fn" ("./tests/snippets/unsafe_calls.rs:24:1: 24:26")
- => "#[Safety::tag_unsafe_fn(Tag)]\n"
+ => "#[Safety::tag_unsafe_fn(property = Memo(Tag), kind = \"memo\")]\n"
 
 "call" ("./tests/snippets/unsafe_calls.rs:21:1: 21:17")
- => "#[Safety::inner(Tag)]\n"
+ => "#[Safety::inner(property = Memo(Tag), kind = \"memo\")]\n"
 
 
 stderr=
