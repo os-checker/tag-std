@@ -35,7 +35,7 @@ VALUES (:hash1, :hash2, :tool_attrs, :def_path, :function, :timestamp)
 
         let timestamp = jiff::Timestamp::now();
         for data in iter {
-            let tool_attrs = serde_json::to_string(data.func.tool_attrs.as_slice())?;
+            let tool_attrs = serde_json::to_string_pretty(data.func.tool_attrs.as_slice())?;
             stmt.execute(named_params! {
                 ":hash1": data.hash.hash1.cast_signed(),
                 ":hash2": data.hash.hash2.cast_signed(),
