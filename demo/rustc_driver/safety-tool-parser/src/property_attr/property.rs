@@ -129,7 +129,7 @@ impl Kind {
             "precond" => Kind::Precond,
             "hazard" => Kind::Hazard,
             "option" => Kind::Option,
-            "memo" => Kind::Option,
+            "memo" => Kind::Memo,
             _ => unreachable!(
                 "{kind} is invalid: should be one of \
                  precond, hazard, option, and memo."

@@ -123,7 +123,7 @@ pub fn parse_inner_attr(s: &str) -> Option<Property> {
         .find_map(|arg| {
             if let NamedArg::Property(property) = arg { Some(property.clone()) } else { None }
         })
-        .unwrap_or_else(|| panic!("No kind in {set:?}"));
+        .unwrap_or_else(|| panic!("No property in {set:?}"));
     property.kind = set
         .iter()
         .find_map(|arg| if let NamedArg::Kind(kind) = arg { Some(Kind::new(kind)) } else { None })
@@ -208,7 +208,7 @@ fn parse_named_args(
 /// Parse expr as single ident.
 ///
 /// Panic if expr is not Path or a path with multiple segments.
-fn expr_ident(expr: &Expr) -> Ident {
+pub fn expr_ident(expr: &Expr) -> Ident {
     let Expr::Path(path) = expr else { panic!("{expr:?} is not path expr.") };
     path.path.get_ident().unwrap().clone()
 }
