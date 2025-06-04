@@ -57,6 +57,15 @@ impl Property {
         }
     }
 
+    pub fn from_call(expr: &Expr) -> Self {
+        let Expr::Call(call) = expr else { panic!("{expr:?} should be a call expr") };
+        let name = expr_ident(&call.func).to_string();
+        let name = PropertyName::new(&name);
+        let args = call.args.iter().cloned().collect();
+        // NOTE: kind = Memo is a temporary state
+        Property { kind: Kind::Memo, name, expr: args, memo: None }
+    }
+
     /// `PropertyName(arg1, arg2, ...)`
     pub fn property_tokens(&self) -> TokenStream {
         let name = Ident::new(&format!("{:?}", self.name), Span::call_site());
