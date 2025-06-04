@@ -46,19 +46,6 @@ fn testcase(name: &str) -> [String; 2] {
 }
 
 #[test]
-fn unsafe_calls() {
-    let [file, outfile] = &testcase("unsafe_calls");
-    let (exe, output) = compile(file);
-    let stdout = std::str::from_utf8(&output.stdout).unwrap();
-    let stderr = std::str::from_utf8(&output.stderr).unwrap();
-    if !output.status.success() {
-        panic!("Failed to run `{exe} {file}`:\nstdout={stdout}\nstderr={stderr}")
-    }
-    let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
-    expect_file![outfile].assert_eq(&out);
-}
-
-#[test]
 fn unsafe_calls_panic_assign() {
     let [file, outfile] = &testcase("unsafe_calls_panic_assign");
     should_panic(file, outfile);
@@ -74,4 +61,21 @@ fn unsafe_calls_panic_assign_fn_ptr() {
 fn unsafe_calls_panic_no_tag() {
     let [file, outfile] = &testcase("unsafe_calls_panic_no_tag");
     should_panic(file, outfile);
+}
+
+#[test]
+fn unsafe_calls() {
+    let [file, outfile] = &testcase("unsafe_calls");
+    fine(file, outfile);
+}
+
+fn fine(file: &str, outfile: &str) {
+    let (exe, output) = compile(file);
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    let stderr = std::str::from_utf8(&output.stderr).unwrap();
+    if !output.status.success() {
+        panic!("Failed to run `{exe} {file}`:\nstdout={stdout}\nstderr={stderr}")
+    }
+    let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
+    expect_file![outfile].assert_eq(&out);
 }
