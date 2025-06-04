@@ -108,10 +108,10 @@ impl Property {
     pub fn new_with_hir_id(hir_id: HirId, tcx: TyCtxt) -> Vec<Self> {
         let mut v = Vec::new();
 
-        for s in tcx.hir_attrs(hir_id).iter().filter_map(|attr| opt_attribute_to_string(tcx, attr))
-        {
-            push_properties(&s, &mut v);
-        }
+        tcx.hir_attrs(hir_id)
+            .iter()
+            .filter_map(|attr| opt_attribute_to_string(tcx, attr))
+            .for_each(|s| push_properties(&s, &mut v));
 
         v
     }
@@ -143,15 +143,4 @@ fn push_properties(s: &str, v: &mut Vec<Property>) {
             Ok(AttrArg { ident: input.parse()? })
         }
     }
-
-    // if let MetaItemInner::MetaItem(meta) = attr.meta_item_list()?.first()? {
-    //     // #[Safety::path(Property)]
-    //     let property = dbg!(meta).ident()?;
-    //     dbg!(property);
-    //     if let Attribute::Unparsed(tool_attr) = attr {
-    //         if tool_attr.path.segments[0].as_str() == REGISTER_TOOL {
-    //             return Some(SafetyAttr { attr_item: tool_attr, property });
-    //         }
-    //     }
-    // }
 }
