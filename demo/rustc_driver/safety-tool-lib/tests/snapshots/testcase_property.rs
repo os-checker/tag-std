@@ -7,10 +7,10 @@ use std::prelude::rust_2024::*;
 extern crate std;
 use safety_tool_lib::safety;
 /// Align: Make sure pointer `p` must be properly aligned for type `T` before calling this function.
-#[Safety::inner(property = Align(p T), kind = "precond")]
+#[Safety::inner(property = Align(p, T), kind = "precond")]
 pub fn align() {}
 /// Unwrap: Make sure the value p must be Some(T) before calling this function.
-#[Safety::inner(property = Unwrap(p T), kind = "precond")]
+#[Safety::inner(property = Unwrap(p, T), kind = "precond")]
 pub fn unwrap() {}
 /// Alias: Make sure p1 must not have other alias after calling this function.
 #[Safety::inner(property = Alias(p1), kind = "hazard")]

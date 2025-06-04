@@ -2,7 +2,7 @@ use core::cmp::Ordering;
 use indexmap::IndexSet;
 use proc_macro2::{Literal, Span, TokenStream};
 use quote::{ToTokens, TokenStreamExt, quote};
-use syn::*;
+use syn::{punctuated::Punctuated, *};
 
 use crate::property_attr::expr_ident;
 
@@ -69,7 +69,7 @@ impl Property {
     /// `PropertyName(arg1, arg2, ...)`
     pub fn property_tokens(&self) -> TokenStream {
         let name = Ident::new(&format!("{:?}", self.name), Span::call_site());
-        let args: TokenStream = self.expr.iter().map(|arg| arg.to_token_stream()).collect();
+        let args: Punctuated<&Expr, Token![,]> = self.expr.iter().collect();
         quote! {
             #name (#args)
         }
