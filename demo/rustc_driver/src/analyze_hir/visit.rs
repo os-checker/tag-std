@@ -1,4 +1,9 @@
+use std::ops::Range;
+
 use super::db::{Property, ToolAttrs};
+use annotate_snippets::*;
+use itertools::Itertools;
+use rustc_data_structures::fx::FxIndexMap;
 use rustc_hir::{
     def::{DefKind, Res},
     def_id::DefId,
@@ -6,6 +11,7 @@ use rustc_hir::{
     *,
 };
 use rustc_middle::ty::{TyCtxt, TypeckResults};
+use rustc_span::{Span, source_map::SourceMap};
 
 #[derive(Debug)]
 pub struct Call {
@@ -16,7 +22,13 @@ pub struct Call {
 }
 
 impl Call {
-    pub fn check_tool_attrs(&self, fn_hir_id: HirId, tcx: TyCtxt, tool_attrs: &mut ToolAttrs) {
+    pub fn check_tool_attrs(
+        &self,
+        fn_hir_id: HirId,
+        tcx: TyCtxt,
+        src_map: &SourceMap,
+        tool_attrs: &mut ToolAttrs,
+    ) {
         let Some(tags_state) = tool_attrs.get_tags(self.def_id, tcx) else {
             // No tool attrs to be checked.
             return;
@@ -38,9 +50,7 @@ impl Call {
             let is_empty = properties.is_empty();
             if !is_empty {
                 // only checks if Safety tags exist
-                for (tag, state) in &*tags_state {
-                    assert!(*state, "{tag:?} is not discharged");
-                }
+                check_tag_state(tcx, src_map, tags_state, hir_id);
             }
             is_empty
         };
@@ -58,10 +68,55 @@ impl Call {
         }
 
         // make sure Safety tags are all discharged
-        for (tag, state) in dbg!(&*tags_state) {
-            assert!(*state, "{tag:?} is not discharged");
-        }
+        check_tag_state(tcx, src_map, tags_state, self.hir_id);
     }
+}
+
+fn check_tag_state(
+    tcx: TyCtxt,
+    src_map: &SourceMap,
+    tags_state: &mut FxIndexMap<Property, bool>,
+    hir_id: HirId,
+) {
+    let mut n = 0;
+    let undischarged = tags_state
+        .iter()
+        .filter(|(_, state)| !*state)
+        .map(|(tag, _)| {
+            n += 1;
+            tag.as_str()
+        })
+        .format_with(", ", |tag, f| f(&format_args!("`{tag}`")))
+        .to_string();
+    if n != 0 {
+        let span_body = tcx.source_span(hir_id.owner);
+        let is = if n == 1 { "is" } else { "are" };
+        let title = format!("{undischarged} {is} not discharged");
+        let span_node = tcx.hir_span(hir_id);
+        let anno =
+            Level::Error.span(anno_span(span_body, span_node)).label("For this unsafe call.");
+        gen_diagnosis(span_body, src_map, &title, anno);
+    }
+}
+
+fn gen_diagnosis(span_body: Span, src_map: &SourceMap, title: &str, anno: Annotation) {
+    let src_body = src_map.span_to_snippet(span_body).unwrap();
+    dbg!(&src_body);
+    let file_and_line = src_map.lookup_line(span_body.lo()).unwrap();
+    let line_start = file_and_line.line + 1; // adjust to starting from 1
+    let origin = file_and_line.sf.name.prefer_local().to_string_lossy();
+    let snippet = Snippet::source(&src_body).line_start(line_start).origin(&origin);
+
+    let msg = Level::Error.title(title).snippet(snippet.annotation(anno));
+    eprintln!("{}", Renderer::styled().render(msg));
+    std::process::abort()
+}
+
+fn anno_span(span_body: Span, span_node: Span) -> Range<usize> {
+    let body_lo = span_body.lo().0;
+    let node_lo = span_node.lo().0;
+    let node_hi = span_node.hi().0;
+    (node_lo - body_lo) as usize..(node_hi - body_lo) as usize
 }
 
 pub struct Calls<'tcx> {

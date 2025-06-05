@@ -115,6 +115,10 @@ impl Property {
 
         v
     }
+
+    pub fn as_str(&self) -> &str {
+        &self.property
+    }
 }
 
 fn push_properties(s: &str, v: &mut Vec<Property>) {

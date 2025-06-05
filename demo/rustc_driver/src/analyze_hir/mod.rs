@@ -3,7 +3,7 @@ use rustc_hir::{
     Attribute, BodyId, FnSig, HirId, ImplItemKind, ItemKind, Node, def_id::LocalDefId,
 };
 use rustc_middle::ty::TyCtxt;
-use rustc_span::Ident;
+use rustc_span::{Ident, source_map::get_source_map};
 
 mod db;
 mod visit;
@@ -35,6 +35,7 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
 
     let mut tool_attrs =
         db::get_all_tool_attrs(v_hir_fn.iter().filter_map(|f| f.to_data(tcx))).unwrap();
+    let src_map = get_source_map().unwrap();
 
     for hir_fn in &v_hir_fn {
         let body_id = hir_fn.body;
@@ -45,7 +46,7 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);
             for call in &unsafe_calls {
-                call.check_tool_attrs(hir_fn.hir_id, tcx, &mut tool_attrs);
+                call.check_tool_attrs(hir_fn.hir_id, tcx, &src_map, &mut tool_attrs);
             }
         }
     }

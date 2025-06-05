@@ -13,6 +13,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 prettyplease = "0.2"
 jiff = { version = "0.2", features = ["serde"] }
+annotate-snippets = "0.11.5"
 
 safety-tool-parser = { path = "./safety-tool-parser/" }
 
