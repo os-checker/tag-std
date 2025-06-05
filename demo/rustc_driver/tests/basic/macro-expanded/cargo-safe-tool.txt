@@ -1,6 +1,6 @@
 ********* "equivalent" [Rlib] has reached 0 instances *********
-********* "unicode_ident" [Rlib] has reached 12 instances *********
 ********* "build_script_build" [Executable] has reached 156 instances *********
+********* "unicode_ident" [Rlib] has reached 12 instances *********
 ********* "hashbrown" [Rlib] has reached 240 instances *********
 ********* "proc_macro2" [Rlib] has reached 1054 instances *********
 ********* "quote" [Rlib] has reached 505 instances *********

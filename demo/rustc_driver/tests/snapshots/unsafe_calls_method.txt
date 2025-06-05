@@ -8,8 +8,7 @@ stdout=
 
 
 stderr=
-[src/analyze_hir/mod.rs:38:5] tool_attrs.len() = 6
-[src/analyze_hir/mod.rs:47:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:46:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:3 ~ unsafe_calls_method[08f9]::tag_expr).12),
         def_id: DefId(0:8 ~ unsafe_calls_method[08f9]::{impl#0}::call),
@@ -32,7 +31,7 @@ hir_id=HirId(DefId(0:3 ~ unsafe_calls_method[08f9]::tag_expr).0) fn_hir_id=HirId
         property: "Tag",
     }: true,
 }
-[src/analyze_hir/mod.rs:47:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:46:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:4 ~ unsafe_calls_method[08f9]::tag_block).12),
         def_id: DefId(0:8 ~ unsafe_calls_method[08f9]::{impl#0}::call),
@@ -52,7 +51,7 @@ hir_id=HirId(DefId(0:4 ~ unsafe_calls_method[08f9]::tag_block).10) fn_hir_id=Hir
         property: "Tag",
     }: true,
 }
-[src/analyze_hir/mod.rs:47:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:46:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:9 ~ unsafe_calls_method[08f9]::tag_unsafe_fn).10),
         def_id: DefId(0:8 ~ unsafe_calls_method[08f9]::{impl#0}::call),

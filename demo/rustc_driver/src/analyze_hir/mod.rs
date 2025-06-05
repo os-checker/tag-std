@@ -35,7 +35,6 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
 
     let mut tool_attrs =
         db::get_all_tool_attrs(v_hir_fn.iter().filter_map(|f| f.to_data(tcx))).unwrap();
-    dbg!(tool_attrs.len());
 
     for hir_fn in &v_hir_fn {
         let body_id = hir_fn.body;
