@@ -25,6 +25,8 @@ impl Default for CompilationOptions<'_> {
     }
 }
 
+const STOP_COMPILATION: &str = "STOP_COMPILATION";
+
 fn compile(file: &str, opts: CompilationOptions) -> (&'static str, std::process::Output) {
     let exe = env!("CARGO_PKG_NAME");
     let mut cmd = Command::cargo_bin(exe).unwrap();
@@ -32,7 +34,9 @@ fn compile(file: &str, opts: CompilationOptions) -> (&'static str, std::process:
     cmd.arg(file).args(opts.args).env("LD_LIBRARY_PATH", &*LD_LIBRARY_PATH);
 
     if opts.stop {
-        cmd.env("STOP_COMPILATION", "1");
+        cmd.env(STOP_COMPILATION, "1");
+    } else {
+        cmd.env_remove(STOP_COMPILATION);
     }
 
     let output = cmd.output().unwrap();
