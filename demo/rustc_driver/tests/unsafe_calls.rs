@@ -1,6 +1,9 @@
 use assert_cmd::Command;
 use expect_test::expect_file;
-use std::{path::PathBuf, sync::LazyLock};
+use std::{
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
 
 static LD_LIBRARY_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let output = Command::new("rustc").arg("--print=sysroot").output().unwrap();
@@ -51,7 +54,14 @@ fn should_panic(file: &str, outfile: &str, opts: CompilationOptions) {
         panic!("`{exe} {file}` should panic:\nstdout={stdout}\nstderr={stderr}")
     }
     let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
+    let out = strip_current_path(&out);
     expect_file![outfile].assert_eq(&out);
+}
+
+fn strip_current_path(s: &str) -> String {
+    let mut path = Path::new(".").canonicalize().unwrap().to_str().unwrap().to_owned();
+    path.push(std::path::MAIN_SEPARATOR);
+    s.replace(&path, "")
 }
 
 fn testcase(name: &str) -> [String; 2] {
@@ -92,6 +102,7 @@ fn fine(file: &str, outfile: &str, opts: CompilationOptions) {
         panic!("Failed to run `{exe} {file}`:\nstdout={stdout}\nstderr={stderr}")
     }
     let out = format!("stdout=\n{stdout}\nstderr=\n{stderr}");
+    let out = strip_current_path(&out);
     expect_file![outfile].assert_eq(&out);
 }
 
