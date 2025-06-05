@@ -33,7 +33,5 @@ unset STOP_COMPILATION
 
 # Analyze the lib and bin crates.
 # Same as `cargo safe-tool` when tag-std and cargo-safe-tool are installed.
-$CARGO_SAFE_TOOL
-cargo clean
-CARGO_TERM_PROGRESS_WHEN=never $CARGO_SAFE_TOOL 1>macro-expanded/cargo-safe-tool.txt 2>/dev/null
+CARGO_TERM_PROGRESS_WHEN=never $CARGO_SAFE_TOOL | tee macro-expanded/cargo-safe-tool.txt
 cargo expand --lib >macro-expanded/lib.rs
