@@ -8,7 +8,7 @@ stdout=
 
 
 stderr=
-[src/analyze_hir/mod.rs:38:5] tool_attrs.len() = 10
+[src/analyze_hir/mod.rs:38:5] tool_attrs.len() = 4
 [src/analyze_hir/mod.rs:47:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:3 ~ unsafe_calls[3f9f]::tag_expr).5),
