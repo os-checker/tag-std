@@ -1,9 +1,8 @@
 stdout=
 
 stderr=
-[src/analyze_hir/mod.rs:38:5] tool_attrs.len() = 7
-[src/analyze_hir/visit.rs:102:17] self.tcx.def_path_debug_str(call.def_id) = "unsafe_calls_panic_assign[fef6]::call"
-[src/analyze_hir/mod.rs:45:13] &unsafe_calls = [
+[src/analyze_hir/mod.rs:38:5] tool_attrs.len() = 10
+[src/analyze_hir/mod.rs:47:13] &unsafe_calls = [
     Call {
         hir_id: HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).3),
         def_id: DefId(0:4 ~ unsafe_calls_panic_assign[fef6]::call),
@@ -20,6 +19,11 @@ hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).2) fn_hir_id=H
 hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).1) fn_hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).0)
 hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).13) fn_hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).0)
 hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).0) fn_hir_id=HirId(DefId(0:3 ~ unsafe_calls_panic_assign[fef6]::assign).0)
+[src/analyze_hir/visit.rs:61:29] &*tags_state = {
+    Property {
+        property: "Tag",
+    }: false,
+}
 [31mThe application panicked (crashed).[0m
 Message:  [36mProperty { property: "Tag" } is not discharged[0m
 Location: [35msrc/analyze_hir/visit.rs[0m:[35m62[0m

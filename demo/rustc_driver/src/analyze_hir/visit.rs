@@ -5,7 +5,7 @@ use rustc_hir::{
     intravisit::*,
     *,
 };
-use rustc_middle::ty::TyCtxt;
+use rustc_middle::ty::{TyCtxt, TypeckResults};
 
 #[derive(Debug)]
 pub struct Call {
@@ -58,7 +58,7 @@ impl Call {
         }
 
         // make sure Safety tags are all discharged
-        for (tag, state) in &*tags_state {
+        for (tag, state) in dbg!(&*tags_state) {
             assert!(*state, "{tag:?} is not discharged");
         }
     }
@@ -66,6 +66,7 @@ impl Call {
 
 pub struct Calls<'tcx> {
     tcx: TyCtxt<'tcx>,
+    tyck: &'tcx TypeckResults<'tcx>,
     calls: Vec<Call>,
 }
 
@@ -79,17 +80,36 @@ impl<'tcx> Visitor<'tcx> for Calls<'tcx> {
     }
 
     fn visit_expr(&mut self, ex: &'tcx Expr<'tcx>) -> Self::Result {
-        if let ExprKind::Path(QPath::Resolved(_opt_ty, path)) = ex.kind {
-            if let Res::Def(DefKind::Fn, def_id) = path.res {
-                self.calls.push(Call { hir_id: ex.hir_id, def_id });
+        let hir_id = ex.hir_id;
+        match ex.kind {
+            ExprKind::Path(QPath::Resolved(_opt_ty, path)) => {
+                if let Res::Def(DefKind::Fn, def_id) = path.res {
+                    self.calls.push(Call { hir_id, def_id });
+                }
             }
+            // https://doc.rust-lang.org/nightly/nightly-rustc/rustc_hir/hir/enum.ExprKind.html#variant.MethodCall
+            //
+            // res is Err, and  must resolve to get def_id, thus need to call
+            // https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/ty/struct.TypeckResults.html#method.type_dependent_def_id
+            ExprKind::MethodCall(..) => {
+                if let Some(def_id) = self.tyck.type_dependent_def_id(hir_id) {
+                    self.calls.push(Call { hir_id, def_id });
+                } else {
+                    eprintln!("Unable to resolve DefId from {:?}", ex.kind);
+                }
+            }
+            _ => (),
         }
         walk_expr(self, ex)
     }
 }
 
-pub fn get_calls<'tcx>(tcx: TyCtxt<'tcx>, expr: &'tcx Expr<'tcx>) -> Calls<'tcx> {
-    let mut calls = Calls { tcx, calls: Vec::new() };
+pub fn get_calls<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    expr: &'tcx Expr<'tcx>,
+    tyck: &'tcx TypeckResults<'tcx>,
+) -> Calls<'tcx> {
+    let mut calls = Calls { tcx, tyck, calls: Vec::new() };
     walk_expr(&mut calls, expr);
     calls
 }
@@ -98,10 +118,7 @@ impl Calls<'_> {
     pub fn get_unsafe_calls(&self) -> Vec<&Call> {
         self.calls
             .iter()
-            .filter(|call| {
-                dbg!(self.tcx.def_path_debug_str(call.def_id));
-                self.tcx.fn_sig(call.def_id).skip_binder().safety().is_unsafe()
-            })
+            .filter(|call| self.tcx.fn_sig(call.def_id).skip_binder().safety().is_unsafe())
             .collect()
     }
 }

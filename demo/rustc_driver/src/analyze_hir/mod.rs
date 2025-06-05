@@ -38,8 +38,10 @@ pub fn analyze_hir(tcx: TyCtxt) -> Result<()> {
     dbg!(tool_attrs.len());
 
     for hir_fn in &v_hir_fn {
-        let body = tcx.hir_body(hir_fn.body).value;
-        let calls = visit::get_calls(tcx, body);
+        let body_id = hir_fn.body;
+        let body = tcx.hir_body(body_id).value;
+        let tyck = tcx.typeck_body(body_id);
+        let calls = visit::get_calls(tcx, body, tyck);
         let unsafe_calls = calls.get_unsafe_calls();
         if !unsafe_calls.is_empty() {
             dbg!(&unsafe_calls);

@@ -74,6 +74,12 @@ fn unsafe_calls_panic_no_tag() {
     should_panic(file, outfile, Default::default());
 }
 
+#[test]
+fn unsafe_calls_panic_method() {
+    let [file, outfile] = &testcase("unsafe_calls_panic_method");
+    should_panic(file, outfile, Default::default());
+}
+
 fn fine(file: &str, outfile: &str, opts: CompilationOptions) {
     let (exe, output) = compile(file, opts);
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
@@ -88,6 +94,12 @@ fn fine(file: &str, outfile: &str, opts: CompilationOptions) {
 #[test]
 fn unsafe_calls() {
     let [file, outfile] = &testcase("unsafe_calls");
+    fine(file, outfile, Default::default());
+}
+
+#[test]
+fn unsafe_calls_method() {
+    let [file, outfile] = &testcase("unsafe_calls_method");
     fine(file, outfile, Default::default());
 }
 
