@@ -3,6 +3,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 use std::{fs, sync::LazyLock};
 
+pub mod builtin;
 pub mod env;
 
 pub type Str = Box<str>;
@@ -99,9 +100,6 @@ impl GenDocOption {
     }
 }
 
-/// `any` tag is denied in user's spec, and special in doc generation.
-pub const ANY: &str = "any";
-
 /// Data shared in `#[safety]` proc macro.
 #[derive(Debug)]
 struct Key {
@@ -124,6 +122,7 @@ struct Cache {
 static CACHE: LazyLock<Cache> = LazyLock::new(|| {
     let mut cache = Cache::default();
 
+    // Merge toml files.
     let configs: Vec<_> = env::toml_file_paths()
         .into_iter()
         .map(|f| (Configuration::read_toml(&f), f.into_boxed_str()))
@@ -133,8 +132,8 @@ static CACHE: LazyLock<Cache> = LazyLock::new(|| {
 
     for (config, path) in configs {
         for (name, tag) in config.tag {
-            if &*name == ANY {
-                panic!("`any` is a builtin tag. Please remove it from spec.");
+            if builtin::is_builtin_tag(&name) {
+                panic!("`{name}` is a builtin tag. Please remove it from spec.");
             }
             if let Some(old) = cache.map.get(&name) {
                 panic!("Tag {name:?} has been defined: {old:?}");
@@ -143,6 +142,11 @@ static CACHE: LazyLock<Cache> = LazyLock::new(|| {
         }
         cache.doc.merge(&config.doc);
     }
+
+    // Merge builtin tags.
+    cache.map.extend(
+        builtin::tags().into_iter().map(|(name, tag)| (name.into(), Key { tag, src: None })),
+    );
 
     cache.map.sort_unstable_keys();
     eprintln!("Got {} tags.", cache.map.len());
