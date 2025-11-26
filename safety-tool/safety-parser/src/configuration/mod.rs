@@ -107,10 +107,10 @@ pub const ANY: &str = "any";
 struct Key {
     /// Tag defined in config file.
     tag: Tag,
-    /// File path where the tag is defined: we must be sure each tag only
-    /// derives from single file path.
+    /// File path where the tag is defined.
+    /// The path can be None for builtin tags.
     #[allow(dead_code)]
-    src: Str,
+    src: Option<Str>,
 }
 
 #[derive(Default)]
@@ -139,7 +139,7 @@ static CACHE: LazyLock<Cache> = LazyLock::new(|| {
             if let Some(old) = cache.map.get(&name) {
                 panic!("Tag {name:?} has been defined: {old:?}");
             }
-            _ = cache.map.insert(name, Key { tag, src: path.clone() });
+            _ = cache.map.insert(name, Key { tag, src: Some(path.clone()) });
         }
         cache.doc.merge(&config.doc);
     }
