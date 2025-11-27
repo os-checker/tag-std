@@ -207,3 +207,15 @@ fn unsafe_calls_panic_with_dep() {
     let [file, outfile] = &testcase("unsafe_calls_panic_with_dep");
     should_panic(file, outfile, opts);
 }
+
+fn testcase_call_order(name: &str) -> [String; 2] {
+    let file = format!("./tests/call_order/{name}.rs");
+    let outfile = format!("snapshots/call_order/{name}.txt");
+    [file, outfile]
+}
+
+#[test]
+fn call_order_ok1() {
+    let [file, outfile] = &testcase_call_order("ok1");
+    fine(file, outfile, Default::default());
+}

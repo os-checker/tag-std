@@ -1,0 +1,8 @@
+stdout=
+********* "ok1" [Rlib] has reached 3 instances *********
+"bar" ("./tests/call_order/ok1.rs:7:1: 7:20")
+ => "#[rapx::requires(PostToFunc(foo))]\n"
+
+
+stderr=
+Got 7 tags.

@@ -97,9 +97,9 @@ desc = "This function is only called by the specified environment `{env}`."
 args = []
 desc = "This function can only be called once."
 
-[tag.PostToFunc]
-args = [ "fn" ]
-desc = "The function taged by this property can only be called after `{fn}` has been called."
+# [tag.PostToFunc]
+# args = [ "fn" ]
+# desc = "The function taged by this property can only be called after `{fn}` has been called."
 
 [tag.ReturnBy]
 args = [ "val", "fn" ]
