@@ -41,3 +41,8 @@ impl MyStruct {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.len) }
     }
 }
+
+pub fn foo() {}
+
+#[safety::requires(PostToFunc(foo))]
+pub unsafe fn bar() {}

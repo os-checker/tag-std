@@ -61,3 +61,10 @@ impl MyStruct {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.len) }
     }
 }
+pub fn foo() {}
+#[rapx::requires(PostToFunc(foo))]
+/**# Safety
+
+*/
+#[doc = "* PostToFunc: This function must be called after foo.\n\n"]
+pub unsafe fn bar() {}
