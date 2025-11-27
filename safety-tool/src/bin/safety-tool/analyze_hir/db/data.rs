@@ -100,6 +100,7 @@ impl TagState {
     fn clear(&mut self) {
         self.vanilla.clear();
         self.group_of_any.clear();
+        self.undischarged = false;
     }
 
     fn refresh(&mut self, props: &Properties) {
